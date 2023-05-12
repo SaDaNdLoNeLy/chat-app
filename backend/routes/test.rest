@@ -2,9 +2,10 @@ POST http://localhost:8000/api/auth/register
 Content-Type: application/json
 
 {
-  "password": "test004",
-  "email": "test004@gmail.com",
-  "username": "test004"
+  "password": "test001",
+  "email": "test001@gmail.com",
+  "username": "test001",
+  "dob": "2002-08-01"
 }
 
 ###
@@ -12,8 +13,8 @@ POST http://localhost:8000/api/auth/login
 Content-Type: application/json
 
 {
-  "password": "test004",
-  "email": "test004@gmail.com"
+  "password": "test001",
+  "email": "test001@gmail.com"
 }
 
 ###

@@ -5,7 +5,7 @@ require("dotenv").config();
 
 const postRegister = async (req, res) => {
   try {
-    const { username, password, email } = req.body;
+    const { username, password, email, dob } = req.body;
 
     // Check the uniqueness of the email
     const userExisted = await User.exists({ email: email.toLowerCase() });
@@ -21,6 +21,7 @@ const postRegister = async (req, res) => {
       username,
       email: email.toLowerCase(),
       password: encryptedPassword,
+      dob: new Date(dob),
     });
 
     // Create JSON Web Token
@@ -37,7 +38,7 @@ const postRegister = async (req, res) => {
 
     // Send back info
     res.status(201).json({
-      userDetailed: {
+      userDetails: {
         email: user.email,
         token: token,
         username: user.username,

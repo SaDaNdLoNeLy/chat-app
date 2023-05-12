@@ -3,13 +3,14 @@ const router = express.Router();
 const authController = require("../controllers/auth/authController");
 const joi = require("joi");
 const checker = require("express-joi-validation").createValidator({});
-const auth = require("../middleware/auth");
+const tokenChecker = require("../middleware/auth");
 
 // Input validation
 const registerSchema = joi.object({
-  username: joi.string().min(4).max(20).required(),
+  username: joi.string().min(6).max(20).required(),
   password: joi.string().min(6).max(20).required(),
   email: joi.string().email().required(),
+  dob: joi.date().iso().required(),
 });
 
 const loginSchema = joi.object({
@@ -29,8 +30,8 @@ router.post(
   authController.controllers.postLogin
 );
 
-router.get("/test/", auth, (req, res) => {
-  res.send("Pass")
+router.get("/test", tokenChecker, (req, res) => {
+  res.send("Pass");
 });
 
 module.exports = router;
