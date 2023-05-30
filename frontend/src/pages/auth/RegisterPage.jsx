@@ -1,10 +1,25 @@
-/* eslint-disable no-unused-vars */
-import { React, useState, useReducer } from "react";
-import axios from "axios";
+import { React, useState, useReducer, useEffect } from "react";
 import loginImg from "../../assets/login.jpg";
-import Input from "../../components/Input";
-import BirthSelectInput from "../../components/BirthSelectInput";
+import Input from "../../components/authcomp/Input";
+import BirthSelectInput from "../../components/authcomp/BirthSelectInput";
 import { useNavigate } from "react-router-dom";
+import { connect } from "react-redux";
+import { getActions } from "../../store/actions/authAction";
+import { validateLoginForm } from "../../components/Validator";
+
+const getFormNotValidMessage = () => {
+  return "Enter correct email and password which contain 6-20 characters to login.";
+};
+
+const getFormValidMessage = () => {
+  return "You can register in now.";
+};
+
+const mapActionsToProps = (dispatch) => {
+  return {
+    ...getActions(dispatch),
+  };
+};
 const initUserState = {
   email: "",
   password: "",
@@ -35,57 +50,50 @@ function userReducer(state, action) {
   }
 }
 
-export default function RegisterPage() {
-  const [state, dispatch] = useReducer(userReducer, initUserState);
-
+const RegisterPage = ({ register }) => {
   const navigate = useNavigate();
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [state, dispatch] = useReducer(userReducer, initUserState);
+
+  const [isFormValid, setIsFormValid] = useState(false);
+
+  useEffect(() => {
+    setIsFormValid(
+      validateLoginForm({
+        email: state.email,
+        password: state.password,
+      })
+    );
+  }, [state.email, state.password]);
 
   function handleSubmitRegister(e) {
     e.preventDefault();
-    setIsLoading(true);
-    setTimeout(() => {
-      navigate("/login", { replace: true });
-    }, 2000);
-
-    // axios.post("/api/auth/register", state).then((response) => {
-    //   console.log(response.status);
-    //   console.log(response.data);
-    //   if(response.status === 201){
-    //     window.location.href = "/login";
-    //   }
-    // }).catch((error) => {
-    //   console.error("Registration failed:", error);
-    //     setErrorMessage("Registration failed. Please try again.");
-    //     setIsLoading(false);
-    // })
+    register(state, navigate);
   }
 
   function handleUserChange(type, value) {
     dispatch({ type: `SET_${type.toUpperCase()}`, payload: value });
   }
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 h-screen w-full">
+    <div className="grid h-screen w-full grid-cols-1 sm:grid-cols-2">
       <div className="hidden sm:block">
-        <img className="w-full h-full object-cover" src={loginImg} alt="" />
+        <img className="h-full w-full object-cover" src={loginImg} alt="" />
       </div>
 
-      <div className="bg-gray-800  text-gray-400 flex flex-col justify-center">
+      <div className="flex  flex-col justify-center bg-gray-800 text-gray-400">
         <form
-          className="max-w-[480px] w-full mx-auto rounded-lg bg-gray-900 p-8 px-8"
+          className="mx-auto w-full max-w-[480px] rounded-lg bg-gray-900 p-8 px-8"
           onSubmit={handleSubmitRegister}
           type="POST"
         >
-          <h2 className="text-2xl dark:text-white font-bold text-center">
+          <h2 className="text-center text-2xl font-bold dark:text-white">
             Create an account
           </h2>
           <Input
             label="Email"
             type="email"
             name="email"
-            onChange={handleUserChange}
+            setValue={handleUserChange.bind(null, "email")}
             value={state.email}
           />
           {/* con */}
@@ -94,7 +102,7 @@ export default function RegisterPage() {
             label="Username"
             type="text"
             name="username"
-            onChange={handleUserChange}
+            setValue={handleUserChange.bind(null, "username")}
             value={state.username}
           />
           <div className="error"></div>
@@ -102,17 +110,26 @@ export default function RegisterPage() {
             label="Password"
             type="password"
             name="password"
-            onChange={handleUserChange}
+            setValue={handleUserChange.bind(null, "password")}
             value={state.password}
           />
           <div className="error"></div>
           <BirthSelectInput onChange={handleUserChange} value={state.birth} />
-          <button className="w-full mt-5 mb-2 py-2 bg-teal-500 shadow-lg shadow-teal-500/50 hover:shadow-teal-500/40 text-white font-semibold rounded-lg">
-            {isLoading ? "Loading..." : "Continue"}
+          <button
+            data-te-toggle="tooltip"
+            title={
+              isFormValid ? getFormValidMessage() : getFormNotValidMessage()
+            }
+            className="mb-1 mt-5 w-full rounded-lg bg-teal-500 py-2 font-semibold text-white shadow-lg shadow-teal-500/50 hover:shadow-teal-500/40 disabled:bg-gray-400 disabled:shadow-none"
+            type="submit"
+            disabled={!isFormValid}
+            onClick={handleSubmitRegister}
+          >
+            Register
           </button>
           <div className="text-center">
             <span
-              className="text-xs text-blue-500 hover:border-b hover:border-blue-500 hover:cursor-pointer"
+              className="text-xs text-blue-500 hover:cursor-pointer hover:border-b hover:border-blue-500"
               onClick={() => {
                 console.log("Redirecting to login page...");
                 navigate("/login", { replace: true });
@@ -125,4 +142,6 @@ export default function RegisterPage() {
       </div>
     </div>
   );
-}
+};
+
+export default connect(null, mapActionsToProps)(RegisterPage);
