@@ -31,7 +31,7 @@ router.post(
 );
 
 router.get("/test", tokenChecker, (req, res) => {
-  res.send("Pass");
+  res.send(req.user.userId);
 });
 
 module.exports = router;

@@ -1,10 +1,10 @@
-/* eslint-disable no-unused-vars */
 import { React, useState, useReducer } from "react";
 import axios from "axios";
 import loginImg from "../../assets/login.jpg";
 import Input from "../../components/Input";
 import BirthSelectInput from "../../components/BirthSelectInput";
 import { useNavigate } from "react-router-dom";
+
 const initUserState = {
   email: "",
   password: "",
@@ -42,6 +42,7 @@ export default function RegisterPage() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [isFormValid, setIsFormValid] = useState(false)
 
   function handleSubmitRegister(e) {
     e.preventDefault();
@@ -50,17 +51,7 @@ export default function RegisterPage() {
       navigate("/login", { replace: true });
     }, 2000);
 
-    // axios.post("/api/auth/register", state).then((response) => {
-    //   console.log(response.status);
-    //   console.log(response.data);
-    //   if(response.status === 201){
-    //     window.location.href = "/login";
-    //   }
-    // }).catch((error) => {
-    //   console.error("Registration failed:", error);
-    //     setErrorMessage("Registration failed. Please try again.");
-    //     setIsLoading(false);
-    // })
+    
   }
 
   function handleUserChange(type, value) {

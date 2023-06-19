@@ -20,4 +20,14 @@ const checkToken = (req, res, next) => {
   return next();
 }
 
+// const checkForSearch = (req, res, next) => {
+//   let token = req.headers["authorization"];
+//   if (!token) {
+//     return res.status(403).send("Token is required.")
+//   }
+//   try {
+//     token = token.replace(/^Bearer\s+/, "")
+//   }
+// }
+
 module.exports = checkToken;

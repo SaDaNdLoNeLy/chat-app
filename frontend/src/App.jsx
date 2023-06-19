@@ -6,6 +6,7 @@ import {
   createBrowserRouter,
   Navigate,
 } from "react-router-dom";
+import AlertNotification from "./components/AlertNotification";
 
 const router = createBrowserRouter([
   {
@@ -27,7 +28,13 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
-  return <RouterProvider router={router} />;
+  return (
+  <>
+    <RouterProvider router={router} />
+    <AlertNotification />
+  </>
+  )
 }
+  
 
 export default App;

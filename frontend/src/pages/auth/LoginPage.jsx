@@ -40,7 +40,7 @@ const LoginPage = ({ login }) => {
       email,
       password,
     };
-    console.log(userDetails)
+    console.log(userDetails);
     login(userDetails, history);
   };
 
@@ -51,9 +51,7 @@ const LoginPage = ({ login }) => {
       </div>
 
       <div className="bg-gray-800 flex flex-col justify-center">
-        <form
-          className="max-w-[400px] w-full mx-auto rounded-lg bg-gray-900 p-8 px-8"
-        >
+        <form className="max-w-[400px] w-full mx-auto rounded-lg bg-gray-900 p-8 px-8">
           <h2 className="text-2xl dark:text-white font-bold text-center">
             Welcome back!
           </h2>

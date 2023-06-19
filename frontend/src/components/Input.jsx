@@ -1,4 +1,5 @@
-export default function Input({ label, type, name, setValue, value }) {
+export default function Input(props) {
+  const { label, type, name, setValue, value } = props
   const handleChangeInput = (e) => {
     setValue(e.target.value);
   };
