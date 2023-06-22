@@ -1,0 +1,37 @@
+import React, { useEffect } from "react";
+import ChatBox from "../../components/chatcomp/ChatBox";
+import ChatList from "../../components/chatcomp/ChatList";
+import SideSearch from "../../components/chatcomp/SideSearch";
+import { logout } from "../../components/Auth";
+import { connect } from "react-redux";
+import { getActions } from "../../store/actions/authAction";
+import { ChatState } from "../../StateProvider";
+
+const ChatPage = ({setUserDetails}) => {
+  useEffect(() => {
+    const userDetails = localStorage.getItem("user");
+    if (!userDetails) {
+      logout();
+    } else {
+      setUserDetails(JSON.parse(userDetails));
+    }
+  }, []);
+  const {user} = ChatState();
+  return (
+    <div className="h-screen w-screen bg-primary">
+      {user && <SideSearch />}
+      <div className="flex w-screen h-[92%] justify-between p-2">
+        {user&&<ChatList />}
+        {user&&<ChatBox />}
+      </div>
+    </div>
+  );
+};
+
+const mapActionsToProps = (dispatch) => {
+  return {
+    ...getActions(dispatch),
+  };
+};
+
+export default connect(null, mapActionsToProps)(ChatPage);

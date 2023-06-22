@@ -5,10 +5,6 @@ const apiClient = axios.create({
   baseURL: "http://localhost:8000/api",
   timeout: 1000,
 });
-// apiClient.interceptors.request.use((config) => {
-//   config.headers["Content-Type"] = "application/json";
-//   return config;
-// });
 apiClient.interceptors.request.use((config) => {
   const userDetails = localStorage.getItem("user")
   if (userDetails){
@@ -17,7 +13,7 @@ apiClient.interceptors.request.use((config) => {
   }
   return config
 }, (err) => {
-  return Promise.reject(error);
+  return Promise.reject(err);
 })
 
 // Public Route
@@ -39,6 +35,30 @@ export const register = async (data) => {
     error: true, err;
   }
 };
+
+export const searchUser = async (string) => {
+  try {
+    return await apiClient.get(`/user?search=${string}`);
+  } catch (err) {
+    error: true, err;
+  }
+}
+
+export const getChat = async (userId) => {
+  try {
+    return await apiClient.post(`/chat`, {userId})
+  } catch (err) {
+    error:true, err;
+  }
+}
+
+export const getAllChat = async (userId) => {
+  try {
+    return await apiClient.get(`/chat`, {userId})
+  } catch (err) {
+    error:true, err;
+  }
+}
 
 // Secure Route
 const checkResponseCode = (err) => {
