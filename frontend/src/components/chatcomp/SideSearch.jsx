@@ -16,6 +16,7 @@ const SideSearch = () => {
   const userString = localStorage.getItem("user");
   const { user, setSelectedChat, listChat, setListChat, selectedChat } =
     ChatState();
+    
   const handleSearch = async () => {
     if (!search) {
       setOpen(true);
