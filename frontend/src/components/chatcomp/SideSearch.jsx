@@ -16,7 +16,7 @@ const SideSearch = () => {
   const userString = localStorage.getItem("user");
   const { user, setSelectedChat, listChat, setListChat, selectedChat } =
     ChatState();
-    
+
   const handleSearch = async () => {
     if (!search) {
       setOpen(true);
@@ -111,7 +111,7 @@ const SideSearch = () => {
       </div>
       <div className="drawer-side">
         <label htmlFor="my-drawer" className="drawer-overlay"></label>
-        <div className="menu h-full w-80 bg-base-200 p-4 text-base-content">
+        <div className="menu  h-full w-80 bg-base-200 p-4 text-base-content">
           {/* Sidebar content here */}
           <span className="mb-4 text-left text-2xl font-bold">
             Search For User

@@ -22,7 +22,11 @@ apiClient.interceptors.request.use(
 // Public Route
 export const login = async (data) => {
   try {
-    return await apiClient.post("/auth/login", data);
+    return await apiClient.post("/auth/login", data, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
   } catch (err) {
     return {
       error: true,
@@ -89,42 +93,42 @@ export const addUser = async (chatId, userId) => {
   try {
     return await apiClient.put("/chat/groupadd", {
       chatId,
-      userId
-    })
+      userId,
+    });
   } catch (err) {
     error: true, err;
   }
-}
+};
 
 export const removeUser = async (chatId, userId) => {
   try {
     return await apiClient.put("/chat/groupremove", {
       chatId,
-      userId
-    })
+      userId,
+    });
   } catch (err) {
     error: true, err;
   }
-}
+};
 
 export const sendMsg = async (chatId, content) => {
   try {
     return await apiClient.post("/message", {
       chatId,
-      content
-    })
+      content,
+    });
   } catch (err) {
     error: true, err;
   }
-}
+};
 
 export const getMsg = async (chatId) => {
   try {
-    return await apiClient.get(`/message/${chatId}`)
+    return await apiClient.get(`/message/${chatId}`);
   } catch (err) {
     error: true, err;
   }
-}
+};
 
 // Secure Route
 const checkResponseCode = (err) => {

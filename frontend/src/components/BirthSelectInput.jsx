@@ -1,24 +1,6 @@
 import BirthSelectDropDown from "./BirthSelectDropDown";
 import { useState } from "react";
-
-const months = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
-const dates = [...Array(31).keys()].map((idx) => idx + 1);
-const years = [...Array(100).keys()]
-  .reverse()
-  .map((idx) => new Date().getFullYear() - 99 + idx);
+import { MONTHS, DATES, YEARS } from "../util/date";
 
 export default function BirthSelectInput({ onChange, value }) {
   const [selectedDropDown, setSelectedDropDown] = useState(null);
@@ -32,17 +14,17 @@ export default function BirthSelectInput({ onChange, value }) {
   };
 
   return (
-    <div className="flex flex-col  text-gray-400 py-2">
+    <div className="flex flex-col  py-2 text-gray-400">
       <label className="text-xs">Date of birth</label>
 
-      <div className="mt-2 w-full flex justify-between">
+      <div className="mt-2 flex w-full justify-between">
         <BirthSelectDropDown
           label="Day"
           inputValue={value.date}
           onClickInput={handleChangeInput.bind(null, "date")}
           onClickDropDown={handleDropDownClick}
           isSelectDropDown={selectedDropDown === "Day"}
-          data={dates}
+          data={DATES}
         />
         <BirthSelectDropDown
           label="Month"
@@ -50,7 +32,7 @@ export default function BirthSelectInput({ onChange, value }) {
           onClickInput={handleChangeInput.bind(null, "month")}
           onClickDropDown={handleDropDownClick}
           isSelectDropDown={selectedDropDown === "Month"}
-          data={months}
+          data={MONTHS}
         />
         <BirthSelectDropDown
           label="Year"
@@ -58,7 +40,7 @@ export default function BirthSelectInput({ onChange, value }) {
           onClickInput={handleChangeInput.bind(null, "year")}
           onClickDropDown={handleDropDownClick}
           isSelectDropDown={selectedDropDown === "Year"}
-          data={years}
+          data={YEARS}
         />
       </div>
       <div className="error"></div>

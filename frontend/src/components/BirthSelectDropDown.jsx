@@ -8,7 +8,6 @@ const BirthSelectDropDown = ({
   onClickDropDown,
   data,
 }) => {
-
   useEffect(() => {
     const handleOutsideClick = () => {
       if (isSelectDropDown) {
@@ -28,6 +27,7 @@ const BirthSelectDropDown = ({
   };
   const handleInputClick = (e) => {
     onClickInput(e.target.textContent);
+
     if (isSelectDropDown) {
       onClickDropDown(null);
     }
@@ -35,12 +35,12 @@ const BirthSelectDropDown = ({
 
   return (
     <div className="w-3/10 text-inherit">
-      <div className="relative box-border text-base font-medium w-full">
+      <div className="relative box-border w-full text-base font-medium">
         <div
-          className="flex items-center  bg-gray-700 border border-gray-700 rounded-md justify-between min-h-40 relative transition duration-150 box-border opacity-100 focus:outline-none"
+          className="min-h-40 relative  box-border flex items-center justify-between rounded-md border border-gray-700 bg-gray-700 opacity-100 transition duration-150 focus:outline-none"
           onClick={handleDropDownClick}
         >
-          <div className="flex items-center flex-1 flex-wrap px-2 pb-0.5 relative overflow-hidden box-border">
+          <div className="relative box-border flex flex-1 flex-wrap items-center overflow-hidden px-2 pb-0.5">
             <div
               className={`${
                 inputValue === "" ? "text-gray-500" : "text-gray-200"
@@ -50,7 +50,7 @@ const BirthSelectDropDown = ({
                 {inputValue === "" ? label : inputValue}
               </span>
             </div>
-            <div className="m-0.5 py-0.5 visible bg-gray-700 box-border">
+            <div className="visible m-0.5 box-border bg-gray-700 py-0.5">
               <div className="inline-block">
                 <input
                   id=""
@@ -62,16 +62,16 @@ const BirthSelectDropDown = ({
                   tabIndex="0"
                   aria-autocomplete="list"
                   aria-label="Ngày"
-                  className="box-content w-0.5 border-0 text-inherit opacity-0 p-0 outline-none"
+                  className="box-content w-0.5 border-0 p-0 text-inherit opacity-0 outline-none"
                   style={{ background: "0px center" }}
                 />
-                <div className="absolute top-0 left-0 invisible h-0 overflow-scroll whitespace-pre text-base font-sans font-normal tracking-normal "></div>
+                <div className="invisible absolute left-0 top-0 h-0 overflow-scroll whitespace-pre font-sans text-base font-normal tracking-normal "></div>
               </div>
             </div>
           </div>
-          <div className="flex items-center self-stretch flex-shrink-0 box-border">
+          <div className="box-border flex flex-shrink-0 items-center self-stretch">
             <div
-              className="flex pl-0 pr-1 cursor-pointer transition-colors duration-150 box-border opacity-100"
+              className="box-border flex cursor-pointer pl-0 pr-1 opacity-100 transition-colors duration-150"
               aria-hidden="true"
               style={{ color: "rgb(181, 186, 193)" }}
             >
@@ -81,7 +81,7 @@ const BirthSelectDropDown = ({
                 viewBox="0 0 20 20"
                 aria-hidden="true"
                 focusable="false"
-                className="inline-block fill-current align-middle leading-none stroke-current stroke-0"
+                className="inline-block fill-current stroke-current stroke-0 align-middle leading-none"
               >
                 <path d="M4.516 7.548c0.436-0.446 1.043-0.481 1.576 0l3.908 3.747 3.908-3.747c0.533-0.481 1.141-0.446 1.574 0 0.436 0.445 0.408 1.197 0 1.615-0.406 0.418-4.695 4.502-4.695 4.502-0.217 0.223-0.502 0.335-0.787 0.335s-0.57-0.112-0.789-0.335c0 0-4.287-4.084-4.695-4.502s-0.436-1.17 0-1.615z"></path>
               </svg>
@@ -91,7 +91,7 @@ const BirthSelectDropDown = ({
 
         {isSelectDropDown && (
           <div
-            className="text-xs bg-gray-700"
+            className="bg-gray-700 text-xs"
             style={{
               bottom: "100%",
               borderRadius: "0px 0px 4px 4px",
@@ -117,12 +117,12 @@ const BirthSelectDropDown = ({
                 padding: "0px",
               }}
             >
-              {data.map((idx) => (
+              {data.map((month, idx) => (
                 <div
-                  className="hover:bg-gray-500 text-sm"
+                  className="text-sm hover:bg-gray-500"
                   id="react-select-2-option-0"
-                  tabIndex="-1"
-                  key={`${label}-${idx}`}
+                  key={`${month}-${idx}`}
+                  tabIndex={idx + 1}
                   style={{
                     color: "rgb(219, 222, 225)",
                     cursor: "pointer",
@@ -137,7 +137,7 @@ const BirthSelectDropDown = ({
                   }}
                   onClick={handleInputClick}
                 >
-                  {idx}
+                  {month}
                 </div>
               ))}
             </div>

@@ -13,7 +13,7 @@ const StateProvider = ({ children }) => {
     const userInfo = JSON.parse(localStorage.getItem("user"));
     setUser(userInfo);
 
-    if (!userInfo) navigate("/login");
+    // if (!userInfo) navigate("/login");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate]);
 
