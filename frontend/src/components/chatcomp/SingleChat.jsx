@@ -5,11 +5,12 @@ import { sendMsg, getMsg } from "../../api";
 import ChatBadge from "./ChatBadge";
 import io from "socket.io-client";
 import { selectClasses } from "@mui/material";
+import Home from "../callcomp/home";
 
 const getSender = (loggedUser, users) => {
   return users[0]._id === loggedUser._id
-    ? users[1].username
-    : users[0].username;
+    ? users[0].username
+    : users[1].username;
 };
 
 const END_POINT = "http://localhost:8000";
@@ -31,8 +32,7 @@ const SingleChat = ({ fetch, setFetch }) => {
     socket.on("connection", () => setSocketConnected(true));
     socket.on("typing", () => setIsTyping(true))
     socket.on("stop typing", () => setIsTyping(false))
-  }, []);
-
+  }, []); 
   const getAllMessages = async () => {
     if (!selectedChat) {
       return;
@@ -107,6 +107,7 @@ const SingleChat = ({ fetch, setFetch }) => {
             {!selectedChat.isGroup
               ? getSender(user, selectedChat.users)
               : selectedChat.chatName.toUpperCase()}
+            <Home callID = {user._id}/>
             {selectedChat.isGroup ? (
               <UpdateGroupPopup fetch={fetch} setFetch={setFetch} />
             ) : (
