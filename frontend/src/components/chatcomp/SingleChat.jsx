@@ -109,7 +109,7 @@ const SingleChat = ({ fetch, setFetch }) => {
             {!selectedChat.isGroup
               ? getSender(user, selectedChat.users)
               : selectedChat.chatName.toUpperCase()}
-            <Home callID = {user._id}/>
+            {/* <Home callID = {user._id}/> */}
             {selectedChat.isGroup ? (
               <UpdateGroupPopup fetch={fetch} setFetch={setFetch} />
             ) : (
