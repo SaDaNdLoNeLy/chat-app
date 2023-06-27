@@ -6,6 +6,7 @@ export const ConnectionStore = types.model("ConnectionStore", {
   userId: types.maybe(types.string),
   myStream: types.maybe(types.frozen<MediaStream>()),
 })
+
 .actions((self) => ({
   setUsername: (value: string) => (self.username = value),
   setStream: (value: MediaStream | null) => (self.stream = value),
