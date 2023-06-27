@@ -204,13 +204,13 @@ const ChatList = ({ fetch }) => {
         ) : (
           <ChatLoading />
         )}
-        <Stack className="no-scrollbar relative h-full w-full overflow-y-scroll bg-zinc-800 pt-5">
+        <Stack className="no-scrollbar relative h-full w-full overflow-y-scroll bg-zinc-800 pt-2">
           <div className="flex flex-col">
             <div
-              className="sticky -top-5 z-10 box-border flex w-full flex-col bg-zinc-800 py-2 
+              className="sticky -top-2 z-10 box-border flex w-full flex-col bg-zinc-800 py-2 
               shadow-slate-50"
             >
-              <OutlinedInput
+              {/* <OutlinedInput
                 placeholder="Find your friends"
                 className=" w-11/12"
                 sx={{
@@ -218,7 +218,17 @@ const ChatList = ({ fetch }) => {
                   backgroundColor: "#1e1f22",
                   alignSelf: "center",
                 }}
-              />
+              /> */}
+              <label
+                htmlFor="my-drawer"
+                className="btn-primary drawer-button btn h-10 w-40 self-center border-none bg-btn"
+                onClick={() => {
+                  console.log("Xl");
+                }}
+              >
+                <i className="fa-solid fa-magnifying-glass"></i>
+                <span className="hidden md:block">Search User</span>
+              </label>
             </div>
             <div className="ml-2 mt-2 cursor-pointer font-medium hover:text-zinc-300">
               DIRECT MESSAGES

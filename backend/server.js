@@ -13,7 +13,11 @@ const messageRouter = require("./routes/message");
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: "*",
+  })
+);
 
 // Route for authentication
 app.use("/api/auth", authRouter);

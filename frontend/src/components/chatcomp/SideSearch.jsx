@@ -59,16 +59,7 @@ const SideSearch = () => {
     <div className="drawer z-20">
       <input id="my-drawer" type="checkbox" className="drawer-toggle" />
       <div className="drawer-content flex items-center justify-between bg-secondary px-2 py-1">
-        <label
-          htmlFor="my-drawer"
-          className="btn-primary drawer-button btn h-10 w-40 border-none bg-btn"
-          onClick={() => {
-            console.log("Xl");
-          }}
-        >
-          <i className="fa-solid fa-magnifying-glass"></i>
-          <span className="hidden md:block">Search User</span>
-        </label>
+        
         <div className="text-2xl font-bold">VISCORD</div>
         <div>
           <div className="dropdown-end dropdown-hover dropdown">

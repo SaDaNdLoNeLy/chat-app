@@ -2,7 +2,7 @@
 import { React, useEffect, useState } from "react";
 // import * as Components from './com.js';
 import loginImg from "../../assets/login.jpg";
-import Input from "../../components/Input";
+import Input from "../../components/authcomp/Input";
 import { useNavigate } from "react-router-dom";
 import { validateLoginForm } from "../../components/Validator";
 import { connect } from "react-redux";

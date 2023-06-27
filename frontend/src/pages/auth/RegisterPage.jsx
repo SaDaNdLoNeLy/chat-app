@@ -1,7 +1,7 @@
 import { React, useState, useReducer, useEffect } from "react";
 import loginImg from "../../assets/login.jpg";
-import Input from "../../components/Input";
-import BirthSelectInput from "../../components/BirthSelectInput";
+import Input from "../../components/authcomp/Input";
+import BirthSelectInput from "../../components/authcomp/BirthSelectInput";
 import { useNavigate } from "react-router-dom";
 import { connect } from "react-redux";
 import { getActions } from "../../store/actions/authAction";
