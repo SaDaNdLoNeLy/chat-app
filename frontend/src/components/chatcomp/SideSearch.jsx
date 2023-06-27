@@ -56,7 +56,7 @@ const SideSearch = () => {
   };
 
   return (
-    <div className="drawer">
+    <div className="drawer z-20">
       <input id="my-drawer" type="checkbox" className="drawer-toggle" />
       <div className="drawer-content flex items-center justify-between bg-secondary px-2 py-1">
         <label
