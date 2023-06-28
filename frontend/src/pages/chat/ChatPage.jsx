@@ -21,7 +21,7 @@ const ChatPage = ({setUserDetails}) => {
   }, []);
   const {user} = ChatState();
   return (
-    <div className="h-screen w-screen bg-primary">
+    <div className="h-screen w-screen bg-primary overflow-hidden">
       {user && <SideSearch />}
       <div className="flex w-screen h-[92%] justify-between p-2">
         {user&&<ChatList fetch={fetch} />}

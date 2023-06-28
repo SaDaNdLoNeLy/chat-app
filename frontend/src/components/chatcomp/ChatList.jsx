@@ -47,14 +47,18 @@ const ChatList = ({ fetch }) => {
       setErrorContent("Failed to load chats");
     }
   };
-  const [hoverChatCard, setHoverCharCard] = useState(null);
   useEffect(() => {
     setLoggedUser(JSON.parse(localStorage.getItem("user")));
     fetchChat();
   }, [fetch]);
   // console.log("selectedChatOtherUsers", selectedChatOtherUsers);
   return (
-    <div className="container flex w-[500px] flex-col items-center rounded-lg bg-secondary p-2">
+    <div
+      className="container flex w-1/3 flex-col items-center rounded-lg bg-secondary p-2"
+      style={{
+        minWidth: "400px",
+      }}
+    >
       <div className="flex w-full items-center justify-between px-2 pb-2 text-3xl text-white">
         MyChats
         <GroupChatPopup />
@@ -77,7 +81,6 @@ const ChatList = ({ fetch }) => {
         <RightSideBar
           selectedChat={selectedChat}
           currUser={currUser}
-          setHoverCharCard={setHoverCharCard}
           isOpenMic={isOpenMic}
           setIsOpenMic={setIsOpenMic}
           isOpenCamera={isOpenCamera}

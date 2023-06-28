@@ -58,9 +58,9 @@ const SideSearch = () => {
   return (
     <div className="drawer z-20">
       <input id="my-drawer" type="checkbox" className="drawer-toggle" />
-      <div className="drawer-content flex items-center justify-between bg-secondary px-2 py-1">
-        <div className="text-2xl font-bold">VISCORD</div>
-        <div>
+      <div className="drawer-content flex flex-nowrap items-center justify-between bg-secondary px-2 py-1">
+        <div className="mr-10 text-2xl font-bold">VISCORD</div>
+        <div className="flex flex-row flex-nowrap">
           <div className="dropdown-end dropdown-hover dropdown">
             <label tabIndex={0} className="btn m-1 bg-secondary">
               <i className="fa-sharp fa-solid fa-bell text-2xl"></i>
@@ -87,7 +87,7 @@ const SideSearch = () => {
             </label>
             <ul
               tabIndex={0}
-              className="dropdown-content menu rounded-box z-[1] w-52 bg-base-100 p-2 shadow"
+              className="dropdown-content menu rounded-box z-[1] w-52 bg-base-100 p-2 shadow "
             >
               <li>
                 <a>My Profile</a>

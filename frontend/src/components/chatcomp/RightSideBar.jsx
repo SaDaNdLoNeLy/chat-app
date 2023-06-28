@@ -4,10 +4,13 @@ import VideocamIcon from "@mui/icons-material/Videocam";
 import VideocamOffIcon from "@mui/icons-material/VideocamOff";
 import MicOffIcon from "@mui/icons-material/MicOff";
 import { Stack } from "@mui/material";
+import { useState } from "react";
+import { ChatState } from "../../StateProvider";
+import { getChat } from "../../api";
+
 function RightSideBar({
   selectedChat,
   currUser,
-  setHoverCharCard,
   isOpenMic,
   setIsOpenMic,
   isOpenCamera,
@@ -16,6 +19,24 @@ function RightSideBar({
   const selectedChatOtherUsers = selectedChat?.users.filter(
     (u) => u._id !== currUser.id
   );
+  const [userGroupIdx, setUserGroupIdx] = useState(null);
+  const { listChat, setListChat, setSelectedChat } = ChatState();
+  const handleClickGroupUser = async (id) => {
+    const clickedUserChat = listChat.find(
+      (c) => !c.isGroup && id === c.users[1]._id
+    );
+    if (!clickedUserChat) {
+      try {
+        const response = await getChat(id);
+        console.log(response.data);
+        if (!listChat.find((c) => c._id === response.data._id))
+          setListChat([response.data, ...listChat]);
+        setSelectedChat(response.data);
+      } catch (err) {
+        console.log(err);
+      }
+    } else setSelectedChat(clickedUserChat);
+  };
   return (
     <Stack className="no-scrollbar relative h-full w-full overflow-y-scroll bg-zinc-800 pt-2">
       <div className="flex h-full flex-col">
@@ -23,15 +44,6 @@ function RightSideBar({
           className="sticky -top-2 z-10 box-border flex w-full flex-col bg-zinc-800 py-2 
         shadow-slate-50"
         >
-          {/* <OutlinedInput
-          placeholder="Find your friends"
-          className=" w-11/12"
-          sx={{
-            color: "white",
-            backgroundColor: "#1e1f22",
-            alignSelf: "center",
-          }}
-        /> */}
           <label
             htmlFor="my-drawer"
             className="btn-primary drawer-button btn h-10 w-40 self-center border-none bg-btn"
@@ -51,11 +63,14 @@ function RightSideBar({
               <div
                 className="mb-2 flex cursor-pointer flex-row items-center rounded-xl p-2 hover:bg-zinc-600"
                 key={user._id}
+                onClick={() => {
+                  handleClickGroupUser(user._id);
+                }}
                 onMouseEnter={() => {
-                  setHoverCharCard(user._id);
+                  setUserGroupIdx(user._id);
                 }}
                 onMouseLeave={() => {
-                  setHoverCharCard(null);
+                  setUserGroupIdx(null);
                 }}
               >
                 <div className="relative mr-4 flex-shrink-0">
@@ -66,9 +81,11 @@ function RightSideBar({
                     />
                   ) : (
                     <div
-                      className={
-                        "flex h-10 w-10 cursor-pointer select-none items-center justify-center rounded-full bg-zinc-600"
-                      }
+                      className={`flex h-10 w-10 cursor-pointer select-none items-center justify-center rounded-full ${
+                        userGroupIdx === user._id
+                          ? "bg-zinc-800"
+                          : "bg-zinc-600"
+                      }`}
                     >
                       <span className="m-2 select-none text-xl font-bold text-white">
                         {user.username.slice(0, 1).toUpperCase()}
@@ -152,4 +169,4 @@ function RightSideBar({
   );
 }
 
-export default RIghtSideBar;
+export default RightSideBar;
