@@ -27,7 +27,7 @@ const GroupChatPopup = () => {
       const response = await searchUser(search);
       setLoading(false);
       setSearchResult(response.data);
-      console.log(response.data);
+      // console.log(response.data);
     } catch (err) {
       setOpen(true);
       setErrorContent("Failed to load search result");
