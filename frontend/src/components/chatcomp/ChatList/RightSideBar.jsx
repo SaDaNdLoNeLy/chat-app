@@ -41,12 +41,12 @@ function RightSideBar({
     <Stack className="no-scrollbar relative h-full w-full overflow-y-scroll bg-zinc-800 pt-2">
       <div className="flex h-full flex-col">
         <div
-          className="sticky -top-2 z-10 box-border flex w-full flex-col bg-zinc-800 py-2 
+          className="sticky -top-2 z-10 box-border flex w-full flex-col bg-zinc-800 p-2 
         shadow-slate-50"
         >
           <label
             htmlFor="my-drawer"
-            className="btn-primary drawer-button btn h-10 w-40 self-center border-none bg-btn"
+            className="btn-primary drawer-button btn h-10 w-full self-center border-none bg-btn"
           >
             <i className="fa-solid fa-magnifying-glass"></i>
             <span className="hidden md:block">Search User</span>

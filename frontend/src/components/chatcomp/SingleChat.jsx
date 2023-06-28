@@ -126,6 +126,7 @@ const SingleChat = ({ fetch, setFetch }) => {
               type="text"
               placeholder="Type here"
               className="input h-16 w-full border-text flex-shrink-0"
+              value={newMessage}
               onKeyDown={sendMessage}
               onChange={typingHandler}
             />

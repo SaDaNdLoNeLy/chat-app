@@ -16,7 +16,7 @@ const StateProvider = ({ children }) => {
     setUser(userInfo);
     if (!userInfo) navigate("/login");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [navigate]);
+  }, []);
 
   return (
     <ChatContext.Provider

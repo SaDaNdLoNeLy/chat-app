@@ -39,8 +39,10 @@ export const register = async (data) => {
   try {
     return await apiClient.post("/auth/register", data);
   } catch (err) {
-    // error: true, err;
-    console.log(err);
+    return {
+      error: true,
+      err,
+    };
   }
 };
 
@@ -48,8 +50,10 @@ export const searchUser = async (string) => {
   try {
     return await apiClient.get(`/user?search=${string}`);
   } catch (err) {
-    // error: true, err;
-    console.log(err);
+    return {
+      error: true,
+      err,
+    };
   }
 };
 
@@ -57,8 +61,10 @@ export const getChat = async (userId) => {
   try {
     return await apiClient.post(`/chat`, { userId });
   } catch (err) {
-    // error: true, err;
-    console.log(err);
+    return {
+      error: true,
+      err,
+    };
   }
 };
 
@@ -66,8 +72,10 @@ export const getAllChat = async (userId) => {
   try {
     return await apiClient.get(`/chat`, { userId });
   } catch (err) {
-    // error: true, err;
-    console.log(err);
+    return {
+      error: true,
+      err,
+    };
   }
 };
 
@@ -78,8 +86,10 @@ export const createGroup = async (name, users) => {
       users: JSON.stringify(users.map((u) => u._id)),
     });
   } catch (err) {
-    // error: true, err;
-    console.log(err);
+    return {
+      error: true,
+      err,
+    };
   }
 };
 
@@ -90,8 +100,10 @@ export const renameGroup = async (chatId, newName) => {
       chatName: newName,
     });
   } catch (err) {
-    // error: true, err;
-    console.log(err);
+    return {
+      error: true,
+      err,
+    };
   }
 };
 
@@ -102,8 +114,10 @@ export const addUser = async (chatId, userId) => {
       userId,
     });
   } catch (err) {
-    // error: true, err;
-    console.log(err);
+    return {
+      error: true,
+      err,
+    };
   }
 };
 
@@ -114,8 +128,10 @@ export const removeUser = async (chatId, userId) => {
       userId,
     });
   } catch (err) {
-    // error: true, err;
-    console.log(err);
+    return {
+      error: true,
+      err,
+    };
   }
 };
 
@@ -126,8 +142,10 @@ export const sendMsg = async (chatId, content) => {
       content,
     });
   } catch (err) {
-    // error: true, err;
-    console.log(err);
+    return {
+      error: true,
+      err,
+    };
   }
 };
 
@@ -135,8 +153,10 @@ export const getMsg = async (chatId) => {
   try {
     return await apiClient.get(`/message/${chatId}`);
   } catch (err) {
-    // error: true, err;
-    console.log(err);
+    return {
+      error: true,
+      err,
+    };
   }
 };
 

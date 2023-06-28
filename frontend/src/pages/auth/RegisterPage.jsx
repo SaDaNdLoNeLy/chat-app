@@ -51,7 +51,6 @@ function userReducer(state, action) {
 }
 
 const RegisterPage = ({ register }) => {
-  const history = useNavigate();
   const navigate = useNavigate();
 
   const [state, dispatch] = useReducer(userReducer, initUserState);
@@ -69,7 +68,7 @@ const RegisterPage = ({ register }) => {
 
   function handleSubmitRegister(e) {
     e.preventDefault();
-    register(state, history);
+    register(state, navigate);
   }
 
   function handleUserChange(type, value) {
