@@ -83,54 +83,79 @@ function LeftSideBar({
                   }}
                 >
                   {chat.avatar ? (
-                    <div
-                      onClick={() => {
-                        setSelectedChat(chat);
-                        // handleClickImg(chat._id);
-                      }}
-                      className={`h-12 w-12 cursor-pointer select-none hover:rounded-lg ${
-                        selectedChat === chat ? "rounded-lg" : "rounded-full"
-                      } `}
-                      onMouseLeave={() => {
-                        setHoverImgIdx(null);
-                      }}
-                      onMouseEnter={() => {
-                        setHoverImgIdx(chat._id);
-                      }}
-                    >
-                      <img
-                        className={`h-full w-full  object-cover `}
-                        style={{
-                          borderRadius: "inherit",
+                    <div className="float-left before:table before:content-[''] after:clear-both after:table after:content-['']">
+                      <div
+                        onClick={() => {
+                          setSelectedChat(chat);
+                          // handleClickImg(chat._id);
                         }}
-                        src={chat.avatar}
-                      />
+                        className={`flex cursor-pointer select-none items-center justify-center`}
+                        style={{
+                          width: "3rem",
+                          height: "3rem",
+                          webkitTransition:
+                            "background 0.5s, border-radius 0.5s",
+                          transition: "background 0.5s, border-radius 0.5s",
+                          borderRadius: `${
+                            hoverImgIdx === chat._id || selectedChat === chat
+                              ? "0.75rem"
+                              : "50%"
+                          }`,
+                        }}
+                        onMouseLeave={() => {
+                          setHoverImgIdx(null);
+                        }}
+                        onMouseEnter={() => {
+                          setHoverImgIdx(chat._id);
+                        }}
+                      >
+                        <img
+                          className={`h-full w-full  object-cover `}
+                          style={{
+                            borderRadius: "inherit",
+                          }}
+                          src={chat.avatar}
+                        />
+                      </div>
                     </div>
                   ) : (
-                    <div
-                      onClick={() => {
-                        setSelectedChat(chat);
-                        // handleClickImg(chat._id);
-                      }}
-                      className={`flex h-12 w-12 cursor-pointer select-none items-center justify-center rounded-bl-full rounded-br-full rounded-tl-full rounded-tr-full ${
-                        hoverImgIdx === chat._id || selectedChat === chat
-                          ? "rounded-bl-lg rounded-br-lg rounded-tl-lg rounded-tr-lg bg-btn"
-                          : " bg-zinc-600"
-                      } ${myTransition}`}
-                      onMouseLeave={() => {
-                        setHoverImgIdx(null);
-                      }}
-                      onMouseEnter={() => {
-                        setHoverImgIdx(chat._id);
-                      }}
-                    >
-                      <span className="m-2 select-none text-xl font-bold text-white">
-                        {!chat.isGroup
-                          ? getSender(loggedUser, chat.users)
-                              .slice(0, 1)
-                              .toUpperCase()
-                          : chat.chatName.slice(0, 1).toUpperCase()}
-                      </span>
+                    <div className="float-left before:table before:content-[''] after:clear-both after:table after:content-['']">
+                      <div
+                        onClick={() => {
+                          setSelectedChat(chat);
+                        }}
+                        className={`flex cursor-pointer select-none items-center justify-center ${
+                          hoverImgIdx === chat._id || selectedChat === chat
+                            ? "  bg-btn"
+                            : "  bg-zinc-600"
+                        }`}
+                        style={{
+                          width: "3rem",
+                          height: "3rem",
+                          WebkitTransition:
+                            "background 0.5s, border-radius 0.5s",
+                          transition: "background 0.5s, border-radius 0.5s",
+                          borderRadius: `${
+                            hoverImgIdx === chat._id || selectedChat === chat
+                              ? "0.75rem"
+                              : "50%"
+                          }`,
+                        }}
+                        onMouseLeave={() => {
+                          setHoverImgIdx(null);
+                        }}
+                        onMouseEnter={() => {
+                          setHoverImgIdx(chat._id);
+                        }}
+                      >
+                        <span className="m-2 select-none text-xl font-bold text-white">
+                          {!chat.isGroup
+                            ? getSender(loggedUser, chat.users)
+                                .slice(0, 1)
+                                .toUpperCase()
+                            : chat.chatName.slice(0, 1).toUpperCase()}
+                        </span>
+                      </div>
                     </div>
                   )}
                 </Badge>
