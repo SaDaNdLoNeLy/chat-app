@@ -8,8 +8,8 @@ import { selectClasses } from "@mui/material";
 
 const getSender = (loggedUser, users) => {
   return users[0]._id === loggedUser._id
-    ? users[1].username
-    : users[0].username;
+    ? users[0].username
+    : users[1].username;
 };
 
 const END_POINT = "http://localhost:8000";
@@ -125,7 +125,7 @@ const SingleChat = ({ fetch, setFetch }) => {
             <input
               type="text"
               placeholder="Type here"
-              className="input h-16 w-full border-text"
+              className="input h-16 w-full border-text flex-shrink-0"
               onKeyDown={sendMessage}
               onChange={typingHandler}
             />
