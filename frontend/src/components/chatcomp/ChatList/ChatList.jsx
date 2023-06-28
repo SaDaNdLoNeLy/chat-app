@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { ChatState } from "../../StateProvider";
+import { ChatState } from "../../../StateProvider";
 import { Snackbar, Alert } from "@mui/material";
 
 // import ToolTip from "../ToolTip";
-import { getAllChat } from "../../api";
-import ChatLoading from "./ChatLoading";
-import GroupChatPopup from "./GroupChatPopup";
+import { getAllChat } from "../../../api";
+import ChatLoading from "../ChatLoading";
+import GroupChatPopup from "../GroupChatPopup";
 import LeftSideBar from "./LeftSideBar";
 import RightSideBar from "./RightSideBar";
 

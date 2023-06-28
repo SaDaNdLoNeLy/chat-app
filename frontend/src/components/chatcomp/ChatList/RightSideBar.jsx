@@ -5,8 +5,8 @@ import VideocamOffIcon from "@mui/icons-material/VideocamOff";
 import MicOffIcon from "@mui/icons-material/MicOff";
 import { Stack } from "@mui/material";
 import { useState } from "react";
-import { ChatState } from "../../StateProvider";
-import { getChat } from "../../api";
+import { ChatState } from "../../../StateProvider";
+import { getChat } from "../../../api";
 
 function RightSideBar({
   selectedChat,

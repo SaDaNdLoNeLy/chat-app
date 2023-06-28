@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import ChatBox from "../../components/chatcomp/ChatBox";
-import ChatList from "../../components/chatcomp/ChatList";
+import ChatList from "../../components/chatcomp/ChatList/ChatList";
 import SideSearch from "../../components/chatcomp/SideSearch";
 import { logout } from "../../components/Auth";
 import { connect } from "react-redux";
