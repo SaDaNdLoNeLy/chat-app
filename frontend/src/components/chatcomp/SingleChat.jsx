@@ -103,7 +103,7 @@ const SingleChat = ({ fetch, setFetch }) => {
     <>
       {selectedChat ? (
         <>
-          <div className="rounded-b-non flex w-full items-center justify-between rounded-lg px-4 py-4 text-3xl font-bold text-white">
+          <div className="rounded-b-non flex w-full items-center justify-between rounded-lg pl-4 py-4 text-3xl font-bold text-white">
             {!selectedChat.isGroup
               ? getSender(user, selectedChat.users)
               : selectedChat.chatName.toUpperCase()}
