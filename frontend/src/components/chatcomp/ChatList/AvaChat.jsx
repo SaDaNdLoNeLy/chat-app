@@ -24,7 +24,7 @@ function AvaChat({
         style={{
           width: "3rem",
           height: "3rem",
-          webkitTransition: "background 0.5s, border-radius 0.5s",
+          WebkitTransition: "background 0.5s, border-radius 0.5s",
           transition: "background 0.5s, border-radius 0.5s",
           borderRadius: `${
             hoverImgIdx === chat._id || selectedChat === chat
