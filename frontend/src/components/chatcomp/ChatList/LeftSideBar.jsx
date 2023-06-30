@@ -1,6 +1,7 @@
 import React from "react";
 import { Stack, Divider, Tooltip, Badge } from "@mui/material";
 import AvaChat from "./AvaChat";
+import { getSender } from "../../../utils/chat";
 
 const myTransition = "transition duration-500 ease-in-out";
 function LeftSideBar({
@@ -11,7 +12,6 @@ function LeftSideBar({
   loggedUser,
   setSelectedChat,
   setHoverImgIdx,
-  getSender,
 }) {
   const sortedListChat = listChat?.sort((a, b) => {
     if (a.isGroup && !b.isGroup) return -1;
@@ -90,7 +90,6 @@ function LeftSideBar({
                     selectedChat={selectedChat}
                     setHoverImgIdx={setHoverImgIdx}
                     loggedUser={loggedUser}
-                    getSender={getSender}
                   />
                 </Badge>
               </Tooltip>

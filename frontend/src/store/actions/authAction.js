@@ -1,6 +1,6 @@
 import * as api from "../../api";
 import { showAlertMessage } from "./alertAction";
-import { MONTHS, zeroPad } from "../../util/date";
+import { MONTHS, zeroPad } from "../../utils/date";
 export const authActions = {
   SET_USER_DETAILS: "AUTH.SET_USER_DETAILS",
 };

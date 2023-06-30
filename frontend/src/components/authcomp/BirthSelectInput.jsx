@@ -1,6 +1,6 @@
 import BirthSelectDropDown from "./BirthSelectDropDown";
 import { useState } from "react";
-import { DATES, MONTHS, YEARS } from "../../util/date";
+import { DATES, MONTHS, YEARS } from "../../utils/date";
 
 export default function BirthSelectInput({ onChange, value }) {
   const [selectedDropDown, setSelectedDropDown] = useState(null);

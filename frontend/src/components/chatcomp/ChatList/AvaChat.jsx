@@ -1,5 +1,5 @@
 import React from "react";
-
+import { getSender } from "../../../utils/chat";
 function AvaChat({
   setSelectedChat,
   hoverImgIdx,
@@ -7,7 +7,6 @@ function AvaChat({
   chat,
   setHoverImgIdx,
   loggedUser,
-  getSender,
 }) {
   return (
     <div className="float-left before:table before:content-[''] after:clear-both after:table after:content-['']">
