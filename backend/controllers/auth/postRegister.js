@@ -39,6 +39,7 @@ const postRegister = async (req, res) => {
     // Send back info
     res.status(201).json({
       userDetails: {
+        id: user._id,
         email: user.email,
         token: token,
         username: user.username,

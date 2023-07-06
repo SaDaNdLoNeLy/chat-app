@@ -44,6 +44,7 @@ const register = (userDetails, navigate) => {
       2
     )}-${zeroPad(userDetails.birth.date, 2)}`;
     const response = await api.register({
+      id: userDetails.id,
       password: userDetails.password,
       email: userDetails.email,
       username: userDetails.username,
