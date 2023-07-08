@@ -1,8 +1,10 @@
+/* eslint-disable react/prop-types */
 import React from "react";
 import { Stack, Divider, Tooltip, Badge } from "@mui/material";
 import AvaChat from "./AvaChat";
 import { getSender } from "../../../utils/chat";
 
+// eslint-disable-next-line no-unused-vars
 const myTransition = "transition duration-500 ease-in-out";
 function LeftSideBar({
   listChat,

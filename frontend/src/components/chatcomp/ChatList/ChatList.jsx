@@ -11,7 +11,7 @@ import RightSideBar from "./RightSideBar";
 
 const myTransition = "transition-all duration-500 ease-in-out";
 
-const ChatList = ({ fetch }) => {
+const ChatList = ({ fetch, setFetch }) => {
   const [isOpenCamera, setIsOpenCamera] = useState(false);
   const [isOpenMic, setIsOpenMic] = useState(false);
 
@@ -78,6 +78,9 @@ const ChatList = ({ fetch }) => {
           setIsOpenMic={setIsOpenMic}
           isOpenCamera={isOpenCamera}
           setIsOpenCamera={setIsOpenCamera}
+          fetch={fetch} 
+          setFetch={setFetch}
+
         />
       </div>
       <Snackbar

@@ -1,12 +1,14 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable react/prop-types */
 import React from "react";
 import MicIcon from "@mui/icons-material/Mic";
 import VideocamIcon from "@mui/icons-material/Videocam";
 import VideocamOffIcon from "@mui/icons-material/VideocamOff";
 import MicOffIcon from "@mui/icons-material/MicOff";
-import { Stack } from "@mui/material";
+import { Stack ,Snackbar,Alert} from "@mui/material";
 import { useState } from "react";
 import { ChatState } from "../../../StateProvider";
-import { getChat } from "../../../api";
+import { getChat ,removeUser} from "../../../api";
 
 function RightSideBar({
   selectedChat,
@@ -15,12 +17,17 @@ function RightSideBar({
   setIsOpenMic,
   isOpenCamera,
   setIsOpenCamera,
+  setFetch,
+  fetch,
 }) {
+  const [open, setOpen] = useState(false);
+  const [errorContent, setErrorContent] = useState("");
+  const [loading, setLoading] = useState(false);
   const selectedChatOtherUsers = selectedChat?.users.filter(
     (u) => u._id !== currUser.id
   );
   const [userGroupIdx, setUserGroupIdx] = useState(null);
-  const { listChat, setListChat, setSelectedChat } = ChatState();
+  const {user, listChat, setListChat, setSelectedChat } = ChatState();
   const handleClickGroupUser = async (id) => {
     const clickedUserChat = listChat.find(
       (c) => !c.isGroup && id === c.users[1]._id
@@ -37,7 +44,30 @@ function RightSideBar({
       }
     } else setSelectedChat(clickedUserChat);
   };
+
+  const handleDelete = async (userInput) => {
+    if (selectedChat.groupAdmin._id !== user.id) {
+      console.log("k phai admin");
+      setOpen(true);
+      setErrorContent("Only group admin can remove user");
+      return;
+    }
+
+    try {
+      console.log(`la admin ${userInput}`);
+      setLoading(true);
+
+      const response = await removeUser(selectedChat._id, userInput);
+      userInput === user._id
+        ? setSelectedChat()
+        : setSelectedChat(response.data);
+      setFetch(!fetch);
+      setLoading(false);
+    } catch (error) {}
+  };
+  
   return (
+    <>
     <Stack className="no-scrollbar relative h-full w-full overflow-y-scroll bg-zinc-800 pt-2">
       <div className="flex h-full flex-col">
         <div
@@ -56,10 +86,25 @@ function RightSideBar({
         <div className="ml-2 mt-2 cursor-pointer font-medium hover:text-zinc-300">
           {selectedChat?.isGroup && "Online Users".toUpperCase()}
         </div>
+
         <div className="ml-2 mt-2 flex flex-1 flex-col">
+          
           {selectedChat?.isGroup &&
             selectedChatOtherUsers?.length !== 0 &&
             selectedChatOtherUsers?.map((user) => (
+              <>
+              <div className="dropdown-end dropdown-hover dropdown">
+
+              <ul
+                tabIndex={0}
+                className="dropdown-content menu rounded-box z-[1] w-28 bg-base-100 p-2 shadow"
+              >
+                <li>
+                  <button onClick={() => {
+                  handleDelete(user._id);
+                }}>Kick</button>
+                </li>
+              </ul>
               <div
                 className="mb-2 flex cursor-pointer flex-row items-center rounded-xl p-2 hover:bg-zinc-600"
                 key={user._id}
@@ -68,7 +113,10 @@ function RightSideBar({
                 }}
                 onMouseEnter={() => {
                   setUserGroupIdx(user._id);
+                  console.log(user._id);
+                  // handleDelete();
                 }}
+                
                 onMouseLeave={() => {
                   setUserGroupIdx(null);
                 }}
@@ -87,6 +135,7 @@ function RightSideBar({
                           : "bg-zinc-600"
                       }`}
                     >
+                      
                       <span className="m-2 select-none text-xl font-bold text-white">
                         {user.username.slice(0, 1).toUpperCase()}
                       </span>
@@ -116,8 +165,11 @@ function RightSideBar({
                   </div>
                 </div>
               </div>
+              </div>
+                      </>
             ))}
         </div>
+
 
         <div className="sticky -bottom-1 bg-secondary px-2 py-3">
           <div className="flex flex-row items-center justify-between">
@@ -165,8 +217,21 @@ function RightSideBar({
           </div>
         </div>
       </div>
+      
     </Stack>
+<Snackbar
+  open={open}
+  autoHideDuration={3000}
+  onClose={() => {
+    setOpen(false);
+  }}
+  anchorOrigin={{ vertical: "top", horizontal: "right" }}
+>
+  <Alert severity="error">{errorContent}</Alert>
+</Snackbar>
+                </>
   );
+  
 }
 
 export default RightSideBar;
