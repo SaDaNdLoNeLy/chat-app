@@ -24,7 +24,12 @@ const SingleChat = ({ fetch, setFetch }) => {
     socket = io(END_POINT);
     socket.emit("setup", user);
     socket.on("connection", () => setSocketConnected(true));
-    socket.on("typing", () => setIsTyping(true));
+    socket.on("typing", (sender) => {
+      setIsTyping(true);
+      // Sender là tên thằng đang nhắn
+
+
+    });
     socket.on("stop typing", () => setIsTyping(false));
   }, []);
 
@@ -71,18 +76,21 @@ const SingleChat = ({ fetch, setFetch }) => {
         socket.emit("send message", response.data);
         setNewMessage("");
         setMessages([...messages, response.data]);
+        setTyping(false);
       } catch (error) {}
     }
   };
 
   const typingHandler = (e) => {
+    
     setNewMessage(e.target.value);
-
-    if (!socketConnected) return;
-
+    // if (socketConnected) return;
+    console.log(typing);
     if (!typing) {
+      console.log("run");
       setTyping(true);
-      socket.emit("typing", selectedChat._id);
+      socket.emit("typing", {room:selectedChat._id, user : user.username});
+      // console.log(selectedChat._id);
     }
     let lastTyping = new Date().getTime();
     const timer = 2000;
@@ -91,6 +99,8 @@ const SingleChat = ({ fetch, setFetch }) => {
       let dur = now - lastTyping;
       if (dur >= timer && typing) {
         socket.emit("stop typing", selectedChat._id);
+        console.log("stop");
+        setTyping(false);
       }
     }, timer);
   };
@@ -117,7 +127,8 @@ const SingleChat = ({ fetch, setFetch }) => {
                 <ChatBadge messages={messages} />
               </div>
             )}
-            {isTyping ? <span>loading...</span> : <></>}
+            {/* thêm tên thằng đang nhắn vào đây */}
+            {isTyping ? <span className="loading loading-dots loading-lg">hello</span> : <></>}
             <input
               type="text"
               placeholder="Type here"
