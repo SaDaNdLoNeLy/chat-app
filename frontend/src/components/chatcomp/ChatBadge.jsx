@@ -1,29 +1,38 @@
-import React from "react";
 import ScrollableFeed from "react-scrollable-feed";
 import { ChatState } from "../../StateProvider";
+import MessageBubble from "./MessageBubble";
 
-
-const ChatBadge = ({ messages }) => {
+const ChatBadge = ({ messages, handleJoinCall }) => {
   const { user } = ChatState();
+
   return (
     <ScrollableFeed className="no-scrollbar">
       {messages &&
-        messages.map((m) => (
-          <div
-            className={`chat my-2 ${
-              m.sender._id === user.id ? "chat-end" : "chat-start"
-            }`}
-            key={m._id}
-          >
-            <div className="placeholder chat-image avatar">
-              <div className="w-10 rounded-full bg-primary">
-                {m.sender.username[0]}
+        messages.map((m, index) => {
+          // console.log("mType: ", m);
+          return (
+            <div
+              className={`chat my-2 ${
+                m.sender._id === user.id ? "chat-end" : "chat-start"
+              }`}
+              key={m._id}
+            >
+              <div className="placeholder chat-image avatar">
+                <div
+                  className={`w-10 rounded-full ${
+                    m.sender._id === user.id ? "bg-btn" : "bg-primary"
+                  }`}
+                >
+                  {m.sender.username[0]}
+                </div>
               </div>
+              <div className="chat-header">
+                {m.sender._id === user.id ? "You" : m.sender.username}
+              </div>
+              <MessageBubble m={m} handleJoinCall={handleJoinCall} />
             </div>
-            <div className="chat-header">{m.sender.username}</div>
-            <div className="chat-bubble text-white">{m.content}</div>
-          </div>
-        ))}
+          );
+        })}
     </ScrollableFeed>
   );
 };

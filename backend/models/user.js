@@ -5,6 +5,12 @@ const userSchema = new mongoose.Schema({
   username: { type: String, required: true },
   password: { type: String, required: true },
   dob: { type: Date, required: true },
+  status: {
+    type: String,
+    enum: ["online", "offline"],
+    default: "offline",
+  },
+  isCalling: { type: Boolean, default: false },
 });
 
 module.exports = mongoose.model("users", userSchema);

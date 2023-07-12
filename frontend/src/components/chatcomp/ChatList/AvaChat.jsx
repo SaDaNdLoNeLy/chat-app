@@ -12,6 +12,7 @@ function AvaChat({
     <div className="float-left before:table before:content-[''] after:clear-both after:table after:content-['']">
       <div
         onClick={() => {
+          console.log("selected chat: ", chat);
           setSelectedChat(chat);
           // handleClickImg(chat._id);
         }}

@@ -6,19 +6,17 @@ require("dotenv").config();
 const postLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
-
     const user = await User.findOne({ email: email.toLowerCase() });
-
     if (user && (await bcrypt.compare(password, user.password))) {
       // Send JWT token
       const token = jwt.sign(
         {
           userId: user._id,
-          email: email
+          email: email,
         },
         process.env.TOKEN_KEY,
         {
-          expiresIn: "48h"
+          expiresIn: "48h",
         }
       );
 
@@ -34,6 +32,7 @@ const postLogin = async (req, res) => {
 
     return res.status(400).send("Invalid login info. Please try again");
   } catch (err) {
+    console.log(err);
     return res.status(500).send("Something went wrong. Please try again");
   }
 };

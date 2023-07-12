@@ -45,7 +45,6 @@ const postRegister = async (req, res) => {
         username: user.username,
       },
     });
-
   } catch (err) {
     return res.status(500).send("Error! Please try again.");
   }

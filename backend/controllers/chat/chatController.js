@@ -44,6 +44,14 @@ const accessChat = async (req, res) => {
   }
 };
 
+const getAllChatIdContainUser = async (userId) => {
+  const chats = await Chat.find({
+    users: { $elemMatch: { $eq: userId } },
+  });
+  //   console.log(chats);
+  return chats.map((chat) => chat._id.valueOf());
+};
+
 const getChat = async (req, res) => {
   try {
     Chat.find({ users: { $elemMatch: { $eq: req.user.userId } } })
@@ -65,12 +73,12 @@ const getChat = async (req, res) => {
 };
 
 const createGroup = async (req, res) => {
+  // console.log(req.body);
   if (!req.body.users || !req.body.name) {
     return res.status(400).send({ message: "Please fill all the fields" });
   }
 
   let users = JSON.parse(req.body.users);
-
   if (users.length < 2) {
     return res
       .status(400)
@@ -78,7 +86,7 @@ const createGroup = async (req, res) => {
   }
 
   users.push(req.user.userId);
-  console.log(users);
+  // console.log(users);
   try {
     const groupChat = await Chat.create({
       chatName: req.body.name,
@@ -86,7 +94,6 @@ const createGroup = async (req, res) => {
       isGroup: true,
       groupAdmin: req.user.userId,
     });
-
     const fullGroupChat = await Chat.findOne({ _id: groupChat._id })
       .populate("users", "-password")
       .populate("groupAdmin", "-password");
@@ -136,12 +143,12 @@ const addToGroup = async (req, res) => {
     .populate("users", "-password")
     .populate("groupAdmin", "-password");
 
-    if (!modifiedGroup) {
-      res.status(404);
-      throw new Error("Chat Not Found");
-    } else {
-      res.status(200).json(modifiedGroup);
-    }
+  if (!modifiedGroup) {
+    res.status(404);
+    throw new Error("Chat Not Found");
+  } else {
+    res.status(200).json(modifiedGroup);
+  }
 };
 
 const removeFromGroup = async (req, res) => {
@@ -159,12 +166,12 @@ const removeFromGroup = async (req, res) => {
     .populate("users", "-password")
     .populate("groupAdmin", "-password");
 
-    if (!modifiedGroup) {
-      res.status(404);
-      throw new Error("Chat Not Found");
-    } else {
-      res.status(200).json(modifiedGroup);
-    }
+  if (!modifiedGroup) {
+    res.status(404);
+    throw new Error("Chat Not Found");
+  } else {
+    res.status(200).json(modifiedGroup);
+  }
 };
 
 module.exports = {
@@ -174,4 +181,5 @@ module.exports = {
   renameGroup,
   addToGroup,
   removeFromGroup,
+  getAllChatIdContainUser,
 };

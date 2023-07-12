@@ -1,8 +1,8 @@
 import axios from "axios";
 import { logout } from "./components/Auth";
-
+const END_POINT = import.meta.env.VITE_END_POINT_CERT;
 const apiClient = axios.create({
-  baseURL: "http://localhost:8000/api",
+  baseURL: `${END_POINT}/api`,
   timeout: 1000,
 });
 apiClient.interceptors.request.use(
@@ -135,11 +135,12 @@ export const removeUser = async (chatId, userId) => {
   }
 };
 
-export const sendMsg = async (chatId, content) => {
+export const sendMsg = async (chatId, content, chatType) => {
   try {
     return await apiClient.post("/message", {
       chatId,
       content,
+      chatType,
     });
   } catch (err) {
     return {
@@ -160,6 +161,19 @@ export const getMsg = async (chatId) => {
   }
 };
 
+export const genRTCToken = async (chatId) => {
+  try {
+    const resData = await apiClient.post("/agora/rtctoken", {
+      chatId,
+    });
+    return resData.data;
+  } catch (err) {
+    return {
+      error: true,
+      err,
+    };
+  }
+};
 // Secure Route
 const checkResponseCode = (err) => {
   const responseCode = err?.response?.status;

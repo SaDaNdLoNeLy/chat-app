@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
-const User = require("./user")
-const Message = require("./message")
+const User = require("./user");
+const Message = require("./message");
 
 const chatSchema = new mongoose.Schema(
   {
@@ -15,6 +15,18 @@ const chatSchema = new mongoose.Schema(
     latestMessage: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "messages",
+    },
+    currentCall: {
+      isCalling: { type: Boolean, default: false },
+      participants: {
+        type: [
+          {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "users",
+          },
+        ],
+        default: [],
+      },
     },
     groupAdmin: {
       type: mongoose.Schema.Types.ObjectId,

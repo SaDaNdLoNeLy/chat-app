@@ -1,8 +1,7 @@
-import React from "react";
 import { Alert, Snackbar } from "@mui/material";
 import { getActions } from "../store/actions/alertAction";
 import { connect } from "react-redux";
-
+import PropTypes from "prop-types";
 const AlertNotification = ({
   showAlert,
   hideAlertMessage,
@@ -30,6 +29,12 @@ const mapActionsToProps = (dispatch) => {
   return {
     ...getActions(dispatch),
   };
+};
+
+AlertNotification.propTypes = {
+  showAlert: PropTypes.bool.isRequired,
+  hideAlertMessage: PropTypes.func.isRequired,
+  alertMessageContent: PropTypes.string.isRequired,
 };
 
 export default connect(

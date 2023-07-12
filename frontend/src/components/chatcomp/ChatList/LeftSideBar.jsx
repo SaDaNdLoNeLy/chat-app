@@ -1,9 +1,8 @@
 import React from "react";
 import { Stack, Divider, Tooltip, Badge } from "@mui/material";
 import AvaChat from "./AvaChat";
-import { getSender } from "../../../utils/chat";
+import { getSender, getSenderStatus } from "../../../utils/chat";
 
-const myTransition = "transition duration-500 ease-in-out";
 function LeftSideBar({
   listChat,
   hoverImgIdx,
@@ -20,6 +19,7 @@ function LeftSideBar({
       return new Date(b.updatedAt) - new Date(a.updatedAt);
     }
   });
+  // console.log("sortedListChat: ", sortedListChat);
   return (
     <Stack
       className="no-scrollbar relative h-full w-20 flex-shrink-0 overflow-y-scroll pr-3 pt-5"
@@ -57,16 +57,16 @@ function LeftSideBar({
                 title={
                   !chat.isGroup
                     ? getSender(loggedUser, chat.users)
-                    : chat.chatName
+                    : chat.chatName + "(Group)"
                 }
                 placement="right-start"
               >
                 <Badge
-                  badgeContent={chat.not_num}
+                  badgeContent={1}
                   color="primary"
                   anchorOrigin={{
                     horizontal: "right",
-                    vertical: "bottom",
+                    vertical: "top",
                   }}
                   sx={{
                     "& .MuiBadge-badge": {
@@ -83,14 +83,36 @@ function LeftSideBar({
                     },
                   }}
                 >
-                  <AvaChat
-                    chat={chat}
-                    setSelectedChat={setSelectedChat}
-                    hoverImgIdx={hoverImgIdx}
-                    selectedChat={selectedChat}
-                    setHoverImgIdx={setHoverImgIdx}
-                    loggedUser={loggedUser}
-                  />
+                  <div className="relative">
+                    <AvaChat
+                      chat={chat}
+                      setSelectedChat={setSelectedChat}
+                      hoverImgIdx={hoverImgIdx}
+                      selectedChat={selectedChat}
+                      setHoverImgIdx={setHoverImgIdx}
+                      loggedUser={loggedUser}
+                    />
+                    {!chat.isGroup ? (
+                      getSenderStatus(loggedUser, chat.users) ===
+                      "online" ? (
+                        <div
+                          className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-green-500 "
+                          style={{
+                            border: " 3px solid #1e1f22",
+                          }}
+                        />
+                      ) : (
+                        <div
+                          className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-gray-500 "
+                          style={{
+                            border: " 3px solid #1e1f22",
+                          }}
+                        />
+                      )
+                    ) : (
+                      <></>
+                    )}
+                  </div>
                 </Badge>
               </Tooltip>
             </div>

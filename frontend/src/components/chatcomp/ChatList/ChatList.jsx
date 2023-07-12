@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { ChatState } from "../../../StateProvider";
 import { Snackbar, Alert } from "@mui/material";
 
@@ -11,10 +11,7 @@ import RightSideBar from "./RightSideBar";
 
 const myTransition = "transition-all duration-500 ease-in-out";
 
-const ChatList = ({ fetch }) => {
-  const [isOpenCamera, setIsOpenCamera] = useState(false);
-  const [isOpenMic, setIsOpenMic] = useState(false);
-
+const ChatList = ({ fetch, isSocketConnected }) => {
   const [loggedUser, setLoggedUser] = useState();
   const {
     user: currUser,
@@ -23,6 +20,7 @@ const ChatList = ({ fetch }) => {
     listChat,
     setListChat,
   } = ChatState();
+
   const [open, setOpen] = useState(false);
   const [errorContent, setErrorContent] = useState("");
   const [hoverImgIdx, setHoverImgIdx] = useState(null);
@@ -34,7 +32,7 @@ const ChatList = ({ fetch }) => {
   const fetchChat = async () => {
     try {
       const response = await getAllChat(currUser._id);
-      console.log(response.data);
+      console.log("getAllChat: ", response.data);
       setListChat(response.data);
     } catch (err) {
       setOpen(true);
@@ -42,9 +40,11 @@ const ChatList = ({ fetch }) => {
     }
   };
   useEffect(() => {
-    setLoggedUser(JSON.parse(localStorage.getItem("user")));
-    fetchChat();
-  }, [fetch]);
+    if (isSocketConnected) {
+      setLoggedUser(JSON.parse(localStorage.getItem("user")));
+      fetchChat();
+    }
+  }, [fetch, isSocketConnected]);
   // console.log("selectedChatOtherUsers", selectedChatOtherUsers);
   return (
     <div
@@ -71,14 +71,7 @@ const ChatList = ({ fetch }) => {
         ) : (
           <ChatLoading />
         )}
-        <RightSideBar
-          selectedChat={selectedChat}
-          currUser={currUser}
-          isOpenMic={isOpenMic}
-          setIsOpenMic={setIsOpenMic}
-          isOpenCamera={isOpenCamera}
-          setIsOpenCamera={setIsOpenCamera}
-        />
+        <RightSideBar selectedChat={selectedChat} currUser={currUser} />
       </div>
       <Snackbar
         open={open}

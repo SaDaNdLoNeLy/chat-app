@@ -5,3 +5,4 @@ exports.controllers = {
   postLogin,
   postRegister
 }
+

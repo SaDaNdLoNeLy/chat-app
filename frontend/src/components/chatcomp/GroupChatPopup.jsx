@@ -15,7 +15,8 @@ const GroupChatPopup = () => {
   const [loading, setLoading] = useState(false);
 
   const { user, listChat, setListChat } = ChatState();
-
+  // console.log("list chat", listChat);
+  // console.log("selectedUsers", selectedUsers);
   const handleSearch = async (input) => {
     setSearch(input);
     if (!input) {
@@ -44,10 +45,10 @@ const GroupChatPopup = () => {
       const response = await createGroup(groupChatName, selectedUsers);
       setListChat([response.data, ...listChat]);
       setOpen(true);
-      setErrorContent("New group chat created")
+      setErrorContent("New group chat created");
     } catch (err) {
       setOpen(true);
-      setErrorContent("Failed to create group chat")
+      setErrorContent("Failed to create group chat");
     }
   };
 
