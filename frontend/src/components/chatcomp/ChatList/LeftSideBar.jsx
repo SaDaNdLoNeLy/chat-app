@@ -31,12 +31,11 @@ function LeftSideBar({
     >
       {sortedListChat.map((chat, idx) => {
         return (
-          <>
+          <div key={chat._id}>
             <div
               className="
         relative my-3 ml-1 flex w-full flex-row justify-center
       "
-              key={chat._id}
             >
               <div className="absolute left-0 top-0 flex h-12 w-2 items-center justify-start">
                 <span
@@ -100,7 +99,7 @@ function LeftSideBar({
               chat.isGroup !== sortedListChat[idx + 1]?.isGroup && (
                 <Divider className=" bg-white" />
               )}
-          </>
+          </div>
         );
       })}
     </Stack>

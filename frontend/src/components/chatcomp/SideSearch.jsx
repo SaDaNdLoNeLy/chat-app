@@ -5,6 +5,7 @@ import { searchUser, getChat } from "../../api";
 import ChatLoading from "./ChatLoading";
 import UserListItem from "./UserListItem";
 import { ChatState } from "../../StateProvider";
+import { getSender } from "../../utils/chat";
 
 const SideSearch = () => {
   const [search, setSearch] = useState("");
@@ -14,8 +15,15 @@ const SideSearch = () => {
   const [open, setOpen] = useState(false);
   const [errorContent, setErrorContent] = useState("");
   const userString = localStorage.getItem("user");
-  const { user, setSelectedChat, listChat, setListChat, selectedChat } =
-    ChatState();
+  const {
+    user,
+    setSelectedChat,
+    listChat,
+    setListChat,
+    selectedChat,
+    notification,
+    setNotification,
+  } = ChatState();
 
   const handleSearch = async () => {
     if (!search) {
@@ -64,17 +72,29 @@ const SideSearch = () => {
           <div className="dropdown-end dropdown-hover dropdown">
             <label tabIndex={0} className="btn m-1 bg-secondary">
               <i className="fa-sharp fa-solid fa-bell text-2xl"></i>
+              <span className="absolute p-[1px] bg-red-700 rounded-full right-[13px] top-[7px]">{notification.length}</span>
             </label>
             <ul
               tabIndex={0}
               className="dropdown-content menu rounded-box z-[1] w-52 bg-base-100 p-2 shadow"
             >
-              <li>
-                <a>Item 1</a>
-              </li>
-              <li>
-                <a>Item 2</a>
-              </li>
+              {!notification.length && (
+                <li>
+                  <a>No new message</a>
+                </li>
+              )}
+              {notification.map((noti) => (
+                <li key={noti._id}>
+                  <a className="flex justify-end" onClick={() => {
+                    setSelectedChat(noti.chat)
+                    setNotification(notification.filter((n) => n!== noti))
+                  }}>
+                    {noti.chat.isGroup
+                      ? `New message in ${noti.chat.chatName}`
+                      : `New message from ${getSender(user, noti.chat.users)}`}
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
           <div className="dropdown-end dropdown-hover dropdown border border-none">

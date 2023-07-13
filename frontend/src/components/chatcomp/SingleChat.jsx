@@ -12,7 +12,8 @@ const END_POINT = "http://localhost:8000";
 let socket, selectedChatCompare;
 
 const SingleChat = ({ fetch, setFetch }) => {
-  const { user, selectedChat, setSelectedChat } = ChatState();
+  const { user, selectedChat, setSelectedChat, notification, setNotification } =
+    ChatState();
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [newMessage, setNewMessage] = useState();
@@ -27,8 +28,6 @@ const SingleChat = ({ fetch, setFetch }) => {
     socket.on("typing", (sender) => {
       setIsTyping(true);
       // Sender là tên thằng đang nhắn
-
-
     });
     socket.on("stop typing", () => setIsTyping(false));
   }, []);
@@ -53,13 +52,18 @@ const SingleChat = ({ fetch, setFetch }) => {
     selectedChatCompare = selectedChat;
   }, [selectedChat]);
 
+  console.log(notification, "--------");
+
   useEffect(() => {
     socket.on("message received", (newMessage) => {
       if (
         !selectedChatCompare ||
         selectedChatCompare._id !== newMessage.chat._id
       ) {
-        // Notification
+        if (!notification.includes(newMessage)) {
+          setNotification([newMessage, ...notification]);
+          setFetch(!fetch);
+        }
       } else {
         setMessages([...messages, newMessage]);
       }
@@ -82,14 +86,13 @@ const SingleChat = ({ fetch, setFetch }) => {
   };
 
   const typingHandler = (e) => {
-    
     setNewMessage(e.target.value);
     // if (socketConnected) return;
     console.log(typing);
     if (!typing) {
       console.log("run");
       setTyping(true);
-      socket.emit("typing", {room:selectedChat._id, user : user.username});
+      socket.emit("typing", { room: selectedChat._id, user: user.username });
       // console.log(selectedChat._id);
     }
     let lastTyping = new Date().getTime();
@@ -128,7 +131,11 @@ const SingleChat = ({ fetch, setFetch }) => {
               </div>
             )}
             {/* thêm tên thằng đang nhắn vào đây */}
-            {isTyping ? <span className="loading loading-dots loading-lg">hello</span> : <></>}
+            {isTyping ? (
+              <span className="loading loading-dots loading-lg">hello</span>
+            ) : (
+              <></>
+            )}
             <input
               type="text"
               placeholder="Type here"
