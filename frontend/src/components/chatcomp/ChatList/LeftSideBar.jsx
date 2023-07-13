@@ -2,7 +2,7 @@ import React from "react";
 import { Stack, Divider, Tooltip, Badge } from "@mui/material";
 import AvaChat from "./AvaChat";
 import { getSender, getSenderStatus } from "../../../utils/chat";
-
+import SensorsIcon from "@mui/icons-material/Sensors";
 function LeftSideBar({
   listChat,
   hoverImgIdx,
@@ -62,7 +62,7 @@ function LeftSideBar({
                 placement="right-start"
               >
                 <Badge
-                  badgeContent={1}
+                  badgeContent={0}
                   color="primary"
                   anchorOrigin={{
                     horizontal: "right",
@@ -93,8 +93,7 @@ function LeftSideBar({
                       loggedUser={loggedUser}
                     />
                     {!chat.isGroup ? (
-                      getSenderStatus(loggedUser, chat.users) ===
-                      "online" ? (
+                      getSenderStatus(loggedUser, chat.users) === "online" ? (
                         <div
                           className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full bg-green-500 "
                           style={{
@@ -109,6 +108,19 @@ function LeftSideBar({
                           }}
                         />
                       )
+                    ) : chat.currentCall.isCalling ? (
+                      <div
+                        className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-green-500"
+                        style={{
+                          border: " 3px solid #1e1f22",
+                        }}
+                      >
+                        <SensorsIcon
+                          style={{
+                            fontSize: "0.75rem",
+                          }}
+                        />
+                      </div>
                     ) : (
                       <></>
                     )}

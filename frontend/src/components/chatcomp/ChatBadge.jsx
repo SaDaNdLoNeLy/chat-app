@@ -9,7 +9,7 @@ const ChatBadge = ({ messages, handleJoinCall }) => {
     <ScrollableFeed className="no-scrollbar">
       {messages &&
         messages.map((m, index) => {
-          // console.log("mType: ", m);
+          console.log("message: ", m);
           return (
             <div
               className={`chat my-2 ${

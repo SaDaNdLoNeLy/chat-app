@@ -1,28 +1,31 @@
 import { useCall } from "../contexts/callContext";
 import { HStack } from "@chakra-ui/react";
-import { useState } from "react";
 import { ChatState } from "../StateProvider";
-function CallModal({ socketState }) {
-  const { call, setIsCalling } = useCall();
+function CallModal({ socketState, newTabsRef }) {
+  const { call, setIsCalling, resetCall, setIsTurnOffModal } = useCall();
   const { user } = ChatState();
-  const [isTurnOff, setIsTurnOff] = useState(false);
   console.log(call);
   const handleJoinCall = () => {
-    setIsTurnOff(true);
+    setIsTurnOffModal(true);
     setIsCalling(true);
-    window.open(call.joinLink, "_blank").focus();
+    newTabsRef.current.push(window.open(call.joinLink, "_blank"));
+    newTabsRef.current[0].focus();
   };
   const handleClicked = () => {
-    console.log("clicked");
-    setIsTurnOff(true);
-    setIsCalling(false);
+    // console.log("clicked");
+    resetCall();
   };
   // useEffect(() => {},);
   return (
     <dialog
       id="my_modal_2"
       className="modal"
-      open={user && call.caller && call.caller !== user.username && !isTurnOff}
+      open={
+        user &&
+        call.caller &&
+        call.caller !== user.username &&
+        !call.isTurnOffModal
+      }
     >
       <form method="dialog" className="modal-box">
         <div className=" flex flex-row items-center justify-center py-4">

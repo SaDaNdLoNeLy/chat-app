@@ -25,7 +25,7 @@ const StateProvider = ({ children }) => {
       }
       return prevState;
     });
-    
+
     setListChat((prevState) => {
       const newChatList = prevState.map((chat) => {
         if (chat._id === chatId) {
@@ -36,6 +36,32 @@ const StateProvider = ({ children }) => {
             return user;
           });
           return { ...chat, users: newUsers };
+        }
+        return chat;
+      });
+      return newChatList;
+    });
+  };
+
+  const changeCurrentCallInChat = (chatId, rest) => {
+    setSelectedChat((prevState) => {
+      if (!prevState) return prevState;
+      if (prevState._id === chatId) {
+        return {
+          ...prevState,
+          currentCall: {
+            ...prevState.currentCall,
+            ...rest,
+          },
+        };
+      }
+      return prevState;
+    });
+
+    setListChat((prevState) => {
+      const newChatList = prevState.map((chat) => {
+        if (chat._id === chatId) {
+          return { ...chat, currentCall: { ...chat.currentCall, ...rest } };
         }
         return chat;
       });
@@ -60,6 +86,7 @@ const StateProvider = ({ children }) => {
         setSelectedChat,
         setListChat,
         changeStatusUserInChat,
+        changeCurrentCallInChat,
       }}
     >
       {children}

@@ -94,6 +94,11 @@ const CallPage = () => {
           channel: chatId, // your agora channel
           token: RTCToken,
           uid: uid,
+          layout: 1,
+          displayUsername: true,
+          username: user.username,
+          enableScreensharing: true,
+          activeSpeaker: true,
         }}
         callbacks={callbacks}
       />

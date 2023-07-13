@@ -81,7 +81,7 @@ export const getAllChat = async (userId) => {
 
 export const getCallHistory = async (chatId) => {
   try {
-    return await apiClient.get(`/chats/${chatId}/callhistory`);
+    return await apiClient.get(`/callhistories/${chatId}`);
   } catch (err) {
     return {
       error: true,

@@ -4,20 +4,20 @@ import { ChatState } from "../../StateProvider";
 import UpdateGroupPopup from "./UpdateGroupPopup";
 import { sendMsg, getMsg } from "../../api";
 import ChatBadge from "./ChatBadge";
-import io from "socket.io-client";
 import { getSender } from "../../utils/chat";
 import SendIcon from "@mui/icons-material/Send";
 import { HStack } from "@chakra-ui/react";
 import { IconButton } from "@mui/material";
 import CallIcon from "@mui/icons-material/Call";
 import VideocamIcon from "@mui/icons-material/Videocam";
+import VideocamOffIcon from "@mui/icons-material/VideocamOff";
 import { CHAT_TYPE } from "../../utils/constants";
 import { useCall } from "../../contexts/callContext";
 const END_POINT = import.meta.env.VITE_END_POINT_CERT;
 let selectedChatCompare;
 
-const SingleChat = ({ fetch, setFetch, socketState }) => {
-  const { user, selectedChat } = ChatState();
+const SingleChat = ({ fetch, setFetch, socketState, newTabsRef }) => {
+  const { user, selectedChat, changeCurrentCallInChat } = ChatState();
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [newMessage, setNewMessage] = useState("");
@@ -27,6 +27,8 @@ const SingleChat = ({ fetch, setFetch, socketState }) => {
   const { socket, isConnected: isSocketConnected } = socketState;
   const { call, setCaller, setJoinLink, setIsCalling, setChatId, resetCall } =
     useCall();
+
+  console.log("newTabsRef.current: ", newTabsRef.current);
   console.log("call state: ", call);
   // console.log("selectedChat: ", selectedChat);
   useEffect(() => {
@@ -40,13 +42,21 @@ const SingleChat = ({ fetch, setFetch, socketState }) => {
       setJoinLink(joinLink);
       setChatId(chatId);
     });
+
     socket.on("leaved call", (leavedUser, chatId, isCalling) => {
-      // console.log("leaved call: ", user, chatId, isCalling);
-      if (!isCalling) {
+      console.log("leaved call: ", user, chatId, isCalling);
+      if (leavedUser.userId === user.id) {
         resetCall();
-      } else if (leavedUser.userId === user.id) {
-        setIsCalling(false);
+        newTabsRef.current.pop();
       }
+    });
+
+    socket.on("change current call", (chatId, isCalling, joinLink) => {
+      console.log("change current call: ", chatId, isCalling, joinLink);
+      changeCurrentCallInChat(chatId, {
+        isCalling: isCalling,
+        joinLink: joinLink,
+      });
     });
 
     socket.on("message received", (newMessage) => {
@@ -62,6 +72,7 @@ const SingleChat = ({ fetch, setFetch, socketState }) => {
     });
 
     return () => {
+      localStorage.setItem("callTab", JSON.stringify(newTabsRef.current));
       socket.off("typing");
       socket.off("stop typing");
       socket.off("invite call");
@@ -77,7 +88,7 @@ const SingleChat = ({ fetch, setFetch, socketState }) => {
       setLoading(true);
       const response = await getMsg(selectedChat._id);
       setMessages(response.data);
-      console.log(response.data);
+      console.log("allmess: ", response.data);
       setLoading(false);
     } catch (error) {}
   };
@@ -85,6 +96,19 @@ const SingleChat = ({ fetch, setFetch, socketState }) => {
   useEffect(() => {
     getAllMessages();
 
+    if (
+      selectedChat &&
+      selectedChat.currentCall.participants.find((p) => p === user.id)
+    ) {
+      setCaller(null);
+      setJoinLink(selectedChat.currentCall.joinLink);
+      setChatId(selectedChat._id);
+      setIsCalling(true);
+      // newTabsRef.current.push(
+      //   window.open(selectedChat.currentCall.joinLink, "_blank")
+      // );
+      // newTabsRef.current[0].focus();
+    }
     selectedChatCompare = selectedChat;
   }, [selectedChat]);
 
@@ -101,7 +125,7 @@ const SingleChat = ({ fetch, setFetch, socketState }) => {
         // console.log(response.data);
         socket.emit("send message", response.data);
         setNewMessage("");
-        setMessages((prevState) => [...prevState, newMessage]);
+        setMessages((prevState) => [...prevState, response.data]);
       } catch (error) {}
     }
   };
@@ -162,24 +186,84 @@ const SingleChat = ({ fetch, setFetch, socketState }) => {
 
       socket.emit("send message", response.data);
 
-      window.open(joinLink, "_blank").focus();
+      newTabsRef.current.push(window.open(joinLink, "_blank"));
+      // pushNewTab(window.open(joinLink, "_blank"));
+      newTabsRef.current[0].focus();
     } catch (error) {}
   };
 
   const handleJoinCall = (chatType, messageId) => {
-    window
-      .open(
-        window.location.origin +
-          "/call?chat_id=" +
-          selectedChat._id +
-          "&message_id=" +
-          messageId +
-          "&type=" +
-          chatType,
-        "_blank"
-      )
-      .focus();
+    if (call.isCalling && selectedChat._id === call.chatId) {
+      newTabsRef.current[0].focus();
+      return;
+    }
+
+    const joinLink =
+      window.location.origin +
+      "/call?chat_id=" +
+      selectedChat._id +
+      "&message_id=" +
+      messageId +
+      "&type=" +
+      chatType;
+
+    setCaller(null);
+    setJoinLink(joinLink);
+    setIsCalling(true);
+    setChatId(selectedChat._id);
+
+    newTabsRef.current.push(window.open(joinLink, "_blank"));
+    // pushNewTab(window.open(joinLink, "_blank"));
+    newTabsRef.current[0].focus();
   };
+
+  const createCurrentCallButton = () => {
+    // console.log("selectedChat.currentCall: ", selectedChat.currentCall);
+    if (selectedChat.currentCall.isCalling) {
+      if (call.isCalling && selectedChat._id === call.chatId) {
+        return (
+          <div className="select-none rounded-lg bg-gray-400 px-2 py-1">
+            Joined
+          </div>
+        );
+      } else if (call.isCalling) {
+        return (
+          <IconButton onClick={() => {}}>
+            <VideocamOffIcon className="cursor-pointer text-white" />
+          </IconButton>
+        );
+      } else if (!call.isCalling) {
+        return (
+          <div
+            className="cursor-pointer rounded-lg bg-green-400 px-2 py-1"
+            onClick={() => {
+              setCaller(null);
+              setJoinLink(selectedChat.currentCall.joinLink);
+              setChatId(selectedChat._id);
+              setIsCalling(true);
+              window.open(selectedChat.currentCall.joinLink, "_blank").focus();
+            }}
+          >
+            Join
+          </div>
+        );
+      }
+    } else {
+      if (call.isCalling) {
+        return (
+          <IconButton onClick={() => {}}>
+            <VideocamOffIcon className="cursor-pointer text-white" />
+          </IconButton>
+        );
+      }
+      return (
+        <IconButton onClick={() => handleCallClick(CHAT_TYPE.VIDEO)}>
+          <VideocamIcon className="cursor-pointer text-white" />
+        </IconButton>
+      );
+    }
+  };
+
   return (
     <>
       {selectedChat ? (
@@ -192,30 +276,12 @@ const SingleChat = ({ fetch, setFetch, socketState }) => {
             </div>
             {selectedChat.isGroup ? (
               <HStack spacing={10} marginRight={10}>
-                {!call.caller || selectedChat._id !== call.chatId ? (
-                  <IconButton onClick={() => handleCallClick(CHAT_TYPE.VIDEO)}>
-                    <VideocamIcon className="cursor-pointer text-white" />
-                  </IconButton>
-                ) : !call.isCalling ? (
-                  <div
-                    className="cursor-pointer rounded-lg bg-green-400 px-2 py-1"
-                    onClick={() => {
-                      setIsCalling(true);
-                      window.open(call.joinLink, "_blank").focus();
-                    }}
-                  >
-                    Join
-                  </div>
-                ) : (
-                  <div className="select-none rounded-lg bg-gray-400 px-2 py-1">
-                    Joined
-                  </div>
-                )}
+                {createCurrentCallButton()}
                 <UpdateGroupPopup fetch={fetch} setFetch={setFetch} />
               </HStack>
             ) : (
               <HStack spacing={10} marginRight={10}>
-                {!call.caller || selectedChat._id !== call.chatId ? (
+                {!call.joinLink || selectedChat._id !== call.chatId ? (
                   <IconButton
                     onClick={() => {
                       handleCallClick(CHAT_TYPE.VIDEO);

@@ -19,6 +19,9 @@ const ChatPage = () => {
     socket: null,
     isConnected: false,
   });
+
+  const newTabsRef = useRef([]);
+
   useEffect(() => {
     if (user) {
       const socket = io(END_POINT, {
@@ -67,10 +70,11 @@ const ChatPage = () => {
             fetch={fetch}
             setFetch={setFetch}
             socketState={socketState}
+            newTabsRef={newTabsRef}
           />
         )}
       </div>
-      <CallModal socketState={socketState} />
+      <CallModal socketState={socketState} newTabsRef={newTabsRef} />
     </div>
   );
 };

@@ -5,6 +5,7 @@ const initState = {
   joinLink: null,
   chatId: null,
   isCalling: false,
+  isTurnOffModal: false,
 };
 
 const CallContext = createContext(initState);
@@ -27,6 +28,11 @@ const CallProvider = ({ children }) => {
   const setIsCalling = (isCalling) => {
     setCall((prevState) => ({ ...prevState, isCalling: isCalling }));
   };
+
+  const setIsTurnOffModal = (isTurnOffModal) => {
+    setCall((prevState) => ({ ...prevState, isTurnOffModal: isTurnOffModal }));
+  };
+
   const resetCall = () => {
     setCall(initState);
   };
@@ -40,6 +46,7 @@ const CallProvider = ({ children }) => {
         resetCall,
         setIsCalling,
         setChatId,
+        setIsTurnOffModal,
       }}
     >
       {children}
