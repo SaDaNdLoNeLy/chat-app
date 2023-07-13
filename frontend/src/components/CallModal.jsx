@@ -8,10 +8,9 @@ function CallModal({ socketState }) {
   const [isTurnOff, setIsTurnOff] = useState(false);
   console.log(call);
   const handleJoinCall = () => {
-    socketState.socket.emit("join call", call.chatId);
     setIsTurnOff(true);
     setIsCalling(true);
-    window.open(call.joinLink + "&invite=true", "_blank").focus();
+    window.open(call.joinLink, "_blank").focus();
   };
   const handleClicked = () => {
     console.log("clicked");

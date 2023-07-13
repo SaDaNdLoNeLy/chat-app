@@ -30,7 +30,7 @@ const MessageBubble = ({ m, handleJoinCall }) => {
           className={` chat-bubble
              cursor-pointer text-white
           hover:bg-btn`}
-          onClick={() => handleJoinCall(m.chatType)}
+          onClick={() => handleJoinCall(m.chatType, m._id)}
         >
           <VideocamIcon className="mr-2 box-content rounded-md p-1 text-white" />
 

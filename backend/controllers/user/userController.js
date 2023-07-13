@@ -11,8 +11,17 @@ const allUser = async (req, res) => {
       }
     : {};
 
-  const users = await User.find(keyword).find({ _id: { $ne: req.user.userId } });
+  const users = await User.find(keyword).find({
+    _id: { $ne: req.user.userId },
+  });
   res.send(users);
 };
 
-module.exports = { allUser };
+const updateUserCalling = async (userId, isCalling) => {
+  const userObj = await User.findById(userId);
+  userObj.isCalling = isCalling;
+  await userObj.save();
+};
+
+
+module.exports = { allUser, updateUserCalling };

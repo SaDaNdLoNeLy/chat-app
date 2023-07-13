@@ -25,9 +25,13 @@ const {
   updateUserStatusInChats,
   getOnlineUsersNumInRoom,
   joinChats,
+  leaveCallGroup,
 } = require("./controllers/socket");
 
+const { updateUserCalling } = require("./controllers/user/userController");
+
 const { Call, CallHistory } = require("./models/callHistory");
+const { join } = require("path");
 
 app.use(express.json());
 app.use(
@@ -74,23 +78,27 @@ const io = require("socket.io")(server, {
 });
 
 io.use((socket, next) => {
-  const { token, page } = socket.handshake.query;
+  const { token, page, chatId, messageId, joinLink } = socket.handshake.query;
   promisify(jwt.verify)
     .bind(jwt)(token, process.env.TOKEN_KEY)
     .then((decoded) => {
       socket.user = { ...decoded };
       socket.page = page;
+      if (socket.page === "call") {
+        socket.chatId = chatId;
+        socket.messageId = messageId;
+        socket.joinLink = joinLink;
+      }
       next();
     })
     .catch((err) => {
-      if (err.message === "jwt expired") {
-        next(new Error("Token expired"));
-      } else next(new Error("Internal server error"));
+      console.log("err :", err.message);
+      next(new Error("Internal server error"));
     });
 });
 
 io.on("connection", async (socket) => {
-  console.log("connected to socket :", socket.user);
+  console.log("connected to socket :", socket.user, "\npage: ", socket.page);
   // socket.on("setup", (userData) => {
   // console.log("socket.user: ", socket.user, "socket.id: ", socket.id);
 
@@ -122,40 +130,13 @@ io.on("connection", async (socket) => {
   socket.on("typing", (room) => socket.in(room).emit("typing"));
   socket.on("stop typing", (room) => socket.in(room).emit("stop typing"));
 
-  socket.on("send message", async (newMessage, joinLink = null) => {
-    console.log("newMess :", newMessage);
+  socket.on("send message", async (newMessage) => {
+    // console.log("newMess :", newMessage);
     if (!newMessage) return;
     let chat = newMessage.chat;
-    if (!chat.users) console.log("chat.users not defined");
-
-    if (newMessage.chatType === "video" || newMessage.chatType === "audio") {
-      ///create call, add to call history, add participants
-      const callObj = await Call.create({
-        message: newMessage._id,
-      });
-      let callHistoryObj = await CallHistory.findOne({
-        chat: chat._id,
-      });
-      if (!callHistoryObj)
-        callHistoryObj = await CallHistory.create({
-          chat: chat._id,
-        });
-      callHistoryObj.calls.push(callObj._id);
-      await callHistoryObj.save();
-
-      const chatObj = await Chat.findById(chat._id);
-
-      chatObj.currentCall.isCalling = true;
-      chatObj.currentCall.participants = [newMessage.sender._id];
-      await chatObj.save();
-
-      ///sent invite call
-      chat.users.forEach((user) => {
-        if (user._id === newMessage.sender._id) return;
-        socket
-          .in(user._id)
-          .emit("invite call", newMessage.sender.username, chat._id, joinLink);
-      });
+    if (!chat.users) {
+      console.log("chat.users not defined");
+      return;
     }
 
     chat.users.forEach((user) => {
@@ -164,45 +145,59 @@ io.on("connection", async (socket) => {
     });
   });
 
-  socket.on("join call", async (chatId) => {
+  socket.on("join call", async () => {
+    const chatId = socket.chatId;
+    const messageId = socket.messageId;
+    const joinLink = socket.joinLink;
     const chatObj = await Chat.findById(chatId);
-    // console.log("chatObj :", chatObj);
+
+    // console.log("chatObj.currentCall :", chatObj.currentCall);
+
+    if (!chatObj) {
+      socket.emit("join call error", "Chat not found");
+      return;
+    }
     if (
       chatObj.currentCall.participants.find(
         (user_id) => user_id === socket.user.userId
       )
     )
       return;
+
+    if (!chatObj.currentCall.isCalling) {
+      const callObj = await Call.create({
+        message: messageId,
+      });
+      const callHistoryObj = await CallHistory.findOne({
+        chat: chatId,
+      });
+      if (!callHistoryObj)
+        callHistoryObj = await CallHistory.create({
+          chat: chatId,
+        });
+      callHistoryObj.calls.push(callObj._id);
+      await callHistoryObj.save();
+
+      chatObj.currentCall.isCalling = true;
+      chatObj.users.forEach((user) => {
+        const userId = user._id.valueOf();
+        if (userId === socket.user.userId) return;
+        socket
+          .in(userId)
+          .emit("invite call", socket.user.username, chatId, socket.joinLink);
+      });
+    }
+
+    ///update user is calling
+    updateUserCalling(socket.user.userId, true);
+
+    ///update chatobj participants
     chatObj.currentCall.participants.push(socket.user.userId);
     await chatObj.save();
   });
 
-  socket.on("leave call", async (chatId) => {
-    const chatObj = await Chat.findById(chatId);
-    const participants = chatObj.currentCall.participants;
-    console.log("participants :", participants);
-    console.log("socket.user.userId :", socket.user.userId);
-    const index = participants.findIndex(
-      (user_id) => user_id.valueOf() === socket.user.userId
-    );
-    console.log("index :", index);
-    if (index === -1) return;
-    participants.splice(index, 1);
-    if (participants.length === 0) {
-      chatObj.currentCall.isCalling = false;
-    }
-    await chatObj.save();
-    const callHistoryObj = await CallHistory.findOne({ chat: chatId });
-    const lastCall = callHistoryObj.calls[callHistoryObj.calls.length - 1];
-    const callObj = await Call.findById(lastCall);
-    callObj.duration = Date.now() - callObj.createdAt;
-    await callObj.save();
-    socket.in(chatId).emit("leaved call", socket.user.userId, chatId);
-    // socket.emit("leaved call yourself", chatId);
-  });
-
   socket.on("disconnect", async () => {
-    console.log("disconnected");
+    console.log(`${socket.user.username}:${socket.page} disconnected`);
     const sessionChatNum = await getOnlineUsersNumInRoom({
       io,
       room: socket.user.userId,
@@ -212,6 +207,9 @@ io.on("connection", async (socket) => {
       room: socket.user.userId + ":call",
     });
 
+    if (sessionCallNum === 0 && socket.page === "call") {
+      await leaveCallGroup({ socket });
+    }
     if (sessionChatNum === 0 && sessionCallNum === 0) {
       changeStatusUser({ socket, status: USER_STATUS.OFFLINE });
       updateUserStatusInChats({ io, socket, status: USER_STATUS.OFFLINE });

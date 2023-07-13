@@ -25,6 +25,7 @@ const StateProvider = ({ children }) => {
       }
       return prevState;
     });
+    
     setListChat((prevState) => {
       const newChatList = prevState.map((chat) => {
         if (chat._id === chatId) {

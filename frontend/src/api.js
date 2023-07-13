@@ -79,6 +79,17 @@ export const getAllChat = async (userId) => {
   }
 };
 
+export const getCallHistory = async (chatId) => {
+  try {
+    return await apiClient.get(`/chats/${chatId}/callhistory`);
+  } catch (err) {
+    return {
+      error: true,
+      err,
+    };
+  }
+};
+
 export const createGroup = async (name, users) => {
   try {
     return await apiClient.post("/chat/group", {
