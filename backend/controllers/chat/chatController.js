@@ -1,3 +1,4 @@
+const { CallHistory } = require("../../models/callHistory");
 const Chat = require("../../models/chat");
 const User = require("../../models/user");
 

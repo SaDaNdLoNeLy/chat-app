@@ -12,11 +12,13 @@ const userRouter = require("./routes/user");
 const chatRouter = require("./routes/chat");
 const messageRouter = require("./routes/message");
 const agoraRouter = require("./routes/agora");
+const callhistoryRouter = require("./routes/callhistory.route");
 // const { addParticipant } = require("./services/call.service");
 const { promisify } = require("util");
 // const { getCallByChatId, createCall } = require("./services/call.service");
 const Chat = require("./models/chat");
 const User = require("./models/user");
+const Message = require("./models/message");
 const { USER_STATUS } = require("./constants");
 const app = express();
 const fs = require("fs");
@@ -28,7 +30,10 @@ const {
   leaveCallGroup,
 } = require("./controllers/socket");
 
-const { updateUserCalling } = require("./controllers/user/userController");
+const {
+  updateUserCalling,
+  checkUserInCall,
+} = require("./controllers/user/userController");
 
 const { Call, CallHistory } = require("./models/callHistory");
 const { join } = require("path");
@@ -55,6 +60,8 @@ app.use("/api/message", messageRouter);
 
 app.use("/api/agora", agoraRouter);
 
+app.use("/api/callhistories", callhistoryRouter);
+
 const server = https.createServer(options, app);
 
 mongoose
@@ -78,7 +85,8 @@ const io = require("socket.io")(server, {
 });
 
 io.use((socket, next) => {
-  const { token, page, chatId, messageId, joinLink } = socket.handshake.query;
+  const { token, page, chatId, messageId, joinLink, isGroup } =
+    socket.handshake.query;
   promisify(jwt.verify)
     .bind(jwt)(token, process.env.TOKEN_KEY)
     .then((decoded) => {
@@ -88,6 +96,7 @@ io.use((socket, next) => {
         socket.chatId = chatId;
         socket.messageId = messageId;
         socket.joinLink = joinLink;
+        socket.isGroup = isGroup === "true";
       }
       next();
     })
@@ -127,8 +136,8 @@ io.on("connection", async (socket) => {
     socket.join(socket.user.userId);
   }
 
-  socket.on("typing", (room) => socket.in(room).emit("typing"));
-  socket.on("stop typing", (room) => socket.in(room).emit("stop typing"));
+  socket.on("typing", (room) => io.in(room).emit("typing"));
+  socket.on("stop typing", (room) => io.in(room).emit("stop typing"));
 
   socket.on("send message", async (newMessage) => {
     // console.log("newMess :", newMessage);
@@ -141,7 +150,7 @@ io.on("connection", async (socket) => {
 
     chat.users.forEach((user) => {
       if (user._id === newMessage.sender._id) return;
-      socket.in(user._id).emit("message received", newMessage);
+      io.in(user._id).emit("message received", newMessage);
     });
   });
 
@@ -149,8 +158,69 @@ io.on("connection", async (socket) => {
     const chatId = socket.chatId;
     const messageId = socket.messageId;
     const joinLink = socket.joinLink;
-    const chatObj = await Chat.findById(chatId);
+    const isGroup = socket.isGroup;
 
+    const chatObj = await Chat.findById(chatId);
+    const prevCalling = chatObj.currentCall.isCalling;
+    // console.log("chatObj.currentCall :", chatObj.currentCall);
+
+    if (!chatObj) {
+      socket.emit("join call error", "Chat not found");
+      return;
+    }
+    if (
+      chatObj.currentCall.participants.find(
+        (user_id) => user_id.valueOf() === socket.user.userId
+      )
+    )
+      return;
+
+    if (!prevCalling) {
+      const callObj = await Call.create({
+        message: messageId,
+      });
+      let callHistoryObj = await CallHistory.findOne({
+        chat: chatId,
+      });
+      if (!callHistoryObj)
+        callHistoryObj = await CallHistory.create({
+          chat: chatId,
+        });
+      callHistoryObj.calls.push(callObj._id);
+      await callHistoryObj.save();
+
+      chatObj.currentCall.isCalling = true;
+      chatObj.currentCall.joinLink = joinLink;
+    }
+
+    ///update user is calling
+    updateUserCalling(socket.user.userId, true);
+
+    ///update chatobj participants
+    chatObj.currentCall.participants.push(socket.user.userId);
+    await chatObj.save();
+
+    if (!prevCalling && chatObj.isGroup) {
+      chatObj.users.forEach(async (user) => {
+        const userId = user._id.valueOf();
+        if (userId === socket.user.userId) return;
+        if (await checkUserInCall(userId)) return;
+        io.in(userId).emit(
+          "invite call",
+          socket.user,
+          chatId,
+          joinLink,
+          isGroup
+        );
+      });
+
+      io.in(chatId).emit("change current call", chatId, true, joinLink);
+    }
+  });
+
+  socket.on("send call p2p", async (chatId, joinLink, messageId) => {
+    const chatObj = await Chat.findById(chatId);
+    const prevCalling = chatObj.currentCall.isCalling;
     // console.log("chatObj.currentCall :", chatObj.currentCall);
 
     if (!chatObj) {
@@ -164,11 +234,11 @@ io.on("connection", async (socket) => {
     )
       return;
 
-    if (!chatObj.currentCall.isCalling) {
+    if (!prevCalling) {
       const callObj = await Call.create({
         message: messageId,
       });
-      const callHistoryObj = await CallHistory.findOne({
+      let callHistoryObj = await CallHistory.findOne({
         chat: chatId,
       });
       if (!callHistoryObj)
@@ -179,21 +249,57 @@ io.on("connection", async (socket) => {
       await callHistoryObj.save();
 
       chatObj.currentCall.isCalling = true;
-      chatObj.users.forEach((user) => {
-        const userId = user._id.valueOf();
-        if (userId === socket.user.userId) return;
-        socket
-          .in(userId)
-          .emit("invite call", socket.user.username, chatId, socket.joinLink);
-      });
+      chatObj.currentCall.joinLink = joinLink;
     }
 
     ///update user is calling
-    updateUserCalling(socket.user.userId, true);
+    // updateUserCalling(socket.user.userId, true);
 
     ///update chatobj participants
-    chatObj.currentCall.participants.push(socket.user.userId);
+    // chatObj.currentCall.participants.push(socket.user.userId);
     await chatObj.save();
+
+    // const sockets = await io.in(chatId).fetchSockets();
+    // const users = sockets.map((socket) => socket.user);
+    // console.log("num: ", users);
+
+    io.in(chatId).emit("change current call", chatId, true, joinLink);
+    socket
+      .to(chatId)
+      .emit("invite call", socket.user, chatId, joinLink, false, messageId);
+  });
+
+  socket.on("send cancel call", async (chatId, messageId) => {
+    console.log("send cancel call: ", chatId, messageId);
+    const chatObj = await Chat.findById(chatId);
+
+    // console.log("participants :", participants);
+    // console.log("socket.user.userId :", socket.user.userId);
+    ///update user is calling
+    // updateUserCalling(chatObj.currentCall.participants[0], false);
+    // chatObj.currentCall.participants = [];
+
+    chatObj.currentCall.isCalling = false;
+    chatObj.currentCall.joinLink = "";
+
+    const callHistoryObj = await CallHistory.findOne({ chat: chatId });
+    const lastCall = callHistoryObj.calls[callHistoryObj.calls.length - 1];
+    const callObj = await Call.findById(lastCall);
+    callObj.isCanceled = true;
+
+    await callObj.save();
+    await chatObj.save();
+
+    // const sockets = await io.in(chatId).fetchSockets();
+    // const users = sockets.map((socket) => socket.user);
+    // console.log("num: ", users);
+    // console.log("send cancel call: ", chatId, messageId, socket.user.username);
+    io.in(chatId).emit("change current call", chatId, false, "");
+    socket.to(chatId).emit("cancel call", socket.user.username);
+  });
+
+  socket.on("send accept call p2p", (chatId, joinLink) => {
+    socket.to(chatId).emit("accept call p2p", joinLink);
   });
 
   socket.on("disconnect", async () => {
@@ -208,7 +314,7 @@ io.on("connection", async (socket) => {
     });
 
     if (sessionCallNum === 0 && socket.page === "call") {
-      await leaveCallGroup({ socket });
+      await leaveCallGroup({ io, socket });
     }
     if (sessionChatNum === 0 && sessionCallNum === 0) {
       changeStatusUser({ socket, status: USER_STATUS.OFFLINE });

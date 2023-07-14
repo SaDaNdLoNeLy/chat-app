@@ -1,5 +1,4 @@
-import { useEffect, useRef, useState } from "react";
-import ReactDOM from "react-dom";
+import { useEffect, useState } from "react";
 import { ChatState } from "../../StateProvider";
 import UpdateGroupPopup from "./UpdateGroupPopup";
 import { sendMsg, getMsg } from "../../api";
@@ -8,7 +7,6 @@ import { getSender } from "../../utils/chat";
 import SendIcon from "@mui/icons-material/Send";
 import { HStack } from "@chakra-ui/react";
 import { IconButton } from "@mui/material";
-import CallIcon from "@mui/icons-material/Call";
 import VideocamIcon from "@mui/icons-material/Videocam";
 import VideocamOffIcon from "@mui/icons-material/VideocamOff";
 import { CHAT_TYPE } from "../../utils/constants";
@@ -25,8 +23,19 @@ const SingleChat = ({ fetch, setFetch, socketState, newTabsRef }) => {
   const [typing, setTyping] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const { socket, isConnected: isSocketConnected } = socketState;
-  const { call, setCaller, setJoinLink, setIsCalling, setChatId, resetCall } =
-    useCall();
+  const {
+    call,
+    setCaller,
+    setJoinLink,
+    setIsCalling,
+    setChatId,
+    setIsGroup,
+    setIsCancel,
+    resetCall,
+    setMessageId,
+    setFriendName,
+    setIsTurnOffModal,
+  } = useCall();
 
   console.log("newTabsRef.current: ", newTabsRef.current);
   console.log("call state: ", call);
@@ -36,17 +45,27 @@ const SingleChat = ({ fetch, setFetch, socketState, newTabsRef }) => {
     setSocketConnected(true);
     socket.on("typing", () => setIsTyping(true));
     socket.on("stop typing", () => setIsTyping(false));
-    socket.on("invite call", (username, chatId, joinLink) => {
-      console.log("invite call: ", username, chatId, joinLink);
-      setCaller(username);
-      setJoinLink(joinLink);
-      setChatId(chatId);
-    });
+    socket.on(
+      "invite call",
+      (inviteUser, chatId, joinLink, isGroup, messageId) => {
+        console.log("invite call: ", inviteUser, chatId, joinLink);
+        setCaller(inviteUser);
+        setJoinLink(joinLink);
+        setChatId(chatId);
+        setIsGroup(isGroup);
+        setMessageId(messageId);
+      }
+    );
 
-    socket.on("leaved call", (leavedUser, chatId, isCalling) => {
-      console.log("leaved call: ", user, chatId, isCalling);
+    socket.on("leaved call", (leavedUser, chatId, isGroup) => {
+      console.log("leaved call: ", user, chatId, isGroup);
       if (leavedUser.userId === user.id) {
         resetCall();
+        newTabsRef.current.pop();
+      }
+      if (!isGroup && leavedUser.userId !== user.id) {
+        resetCall();
+        newTabsRef.current[0].close();
         newTabsRef.current.pop();
       }
     });
@@ -57,6 +76,19 @@ const SingleChat = ({ fetch, setFetch, socketState, newTabsRef }) => {
         isCalling: isCalling,
         joinLink: joinLink,
       });
+    });
+
+    socket.on("cancel call", (friendName) => {
+      console.log("cancel call", friendName);
+      setIsCancel(true);
+      setFriendName(friendName);
+    });
+
+    socket.on("accept call p2p", (joinLink) => {
+      setIsCalling(true);
+      setIsTurnOffModal(true);
+      newTabsRef.current.push(window.open(joinLink, "_blank"));
+      newTabsRef.current[0].focus();
     });
 
     socket.on("message received", (newMessage) => {
@@ -72,11 +104,14 @@ const SingleChat = ({ fetch, setFetch, socketState, newTabsRef }) => {
     });
 
     return () => {
-      localStorage.setItem("callTab", JSON.stringify(newTabsRef.current));
+      // localStorage.setItem("callTab", JSON.stringify(newTabsRef.current));
       socket.off("typing");
       socket.off("stop typing");
       socket.off("invite call");
       socket.off("message received");
+      socket.off("leaved call");
+      socket.off("change current call");
+      socket.off("cancel call");
     };
   }, [isSocketConnected]);
 
@@ -104,6 +139,7 @@ const SingleChat = ({ fetch, setFetch, socketState, newTabsRef }) => {
       setJoinLink(selectedChat.currentCall.joinLink);
       setChatId(selectedChat._id);
       setIsCalling(true);
+      setIsGroup(selectedChat.isGroup);
       // newTabsRef.current.push(
       //   window.open(selectedChat.currentCall.joinLink, "_blank")
       // );
@@ -166,6 +202,36 @@ const SingleChat = ({ fetch, setFetch, socketState, newTabsRef }) => {
     }, timer);
   };
 
+  const handleCallGroupClick = async (chatType) => {
+    if (!selectedChat) return;
+    try {
+      const response = await sendMsg(selectedChat._id, "", chatType);
+      setMessages([...messages, response.data]);
+      const joinLink =
+        window.location.origin +
+        "/call?chat_id=" +
+        selectedChat._id +
+        "&message_id=" +
+        response.data._id +
+        "&type=" +
+        chatType +
+        "&isGroup=" +
+        selectedChat.isGroup;
+
+      setCaller(user);
+      setJoinLink(joinLink);
+      setIsCalling(true);
+      setChatId(selectedChat._id);
+      setIsGroup(selectedChat.isGroup);
+
+      socket.emit("send message", response.data);
+
+      newTabsRef.current.push(window.open(joinLink, "_blank"));
+      // pushNewTab(window.open(joinLink, "_blank"));
+      newTabsRef.current[0].focus();
+    } catch (error) {}
+  };
+
   const handleCallClick = async (chatType) => {
     if (!selectedChat) return;
     try {
@@ -178,17 +244,24 @@ const SingleChat = ({ fetch, setFetch, socketState, newTabsRef }) => {
         "&message_id=" +
         response.data._id +
         "&type=" +
-        chatType;
-      setCaller(user.username);
+        chatType +
+        "&isGroup=" +
+        selectedChat.isGroup;
+
+      setCaller(user);
       setJoinLink(joinLink);
-      setIsCalling(true);
       setChatId(selectedChat._id);
+      setIsGroup(selectedChat.isGroup);
+      setIsCancel(false);
+      setMessageId(response.data._id);
 
+      socket.emit(
+        "send call p2p",
+        selectedChat._id,
+        joinLink,
+        response.data._id
+      );
       socket.emit("send message", response.data);
-
-      newTabsRef.current.push(window.open(joinLink, "_blank"));
-      // pushNewTab(window.open(joinLink, "_blank"));
-      newTabsRef.current[0].focus();
     } catch (error) {}
   };
 
@@ -205,19 +278,24 @@ const SingleChat = ({ fetch, setFetch, socketState, newTabsRef }) => {
       "&message_id=" +
       messageId +
       "&type=" +
-      chatType;
+      chatType +
+      "&isGroup=" +
+      selectedChat.isGroup;
 
     setCaller(null);
     setJoinLink(joinLink);
     setIsCalling(true);
     setChatId(selectedChat._id);
+    setIsGroup(selectedChat.isGroup);
+    setIsCancel(false);
+    setMessageId(messageId);
 
     newTabsRef.current.push(window.open(joinLink, "_blank"));
     // pushNewTab(window.open(joinLink, "_blank"));
     newTabsRef.current[0].focus();
   };
 
-  const createCurrentCallButton = () => {
+  const createCurrentCallGroupButton = () => {
     // console.log("selectedChat.currentCall: ", selectedChat.currentCall);
     if (selectedChat.currentCall.isCalling) {
       if (call.isCalling && selectedChat._id === call.chatId) {
@@ -241,7 +319,12 @@ const SingleChat = ({ fetch, setFetch, socketState, newTabsRef }) => {
               setJoinLink(selectedChat.currentCall.joinLink);
               setChatId(selectedChat._id);
               setIsCalling(true);
-              window.open(selectedChat.currentCall.joinLink, "_blank").focus();
+              setIsGroup(selectedChat.isGroup);
+
+              newTabsRef.current.push(
+                window.open(selectedChat.currentCall.joinLink, "_blank")
+              );
+              newTabsRef.current[0].focus();
             }}
           >
             Join
@@ -257,13 +340,46 @@ const SingleChat = ({ fetch, setFetch, socketState, newTabsRef }) => {
         );
       }
       return (
-        <IconButton onClick={() => handleCallClick(CHAT_TYPE.VIDEO)}>
+        <IconButton onClick={() => handleCallGroupClick(CHAT_TYPE.VIDEO)}>
           <VideocamIcon className="cursor-pointer text-white" />
         </IconButton>
       );
     }
   };
 
+  const createCurrentCallButton = () => {
+    if (call.isCalling) {
+      if (
+        call.chatId === selectedChat._id &&
+        selectedChat.currentCall.isCalling
+      ) {
+        return (
+          <div className="select-none rounded-lg bg-gray-400 px-2 py-1">
+            Joined
+          </div>
+        );
+      } else {
+        return (
+          <IconButton onClick={() => {}}>
+            <VideocamOffIcon className="cursor-pointer text-white" />
+          </IconButton>
+        );
+      }
+    } else {
+      if (selectedChat.currentCall && selectedChat.currentCall.isCalling) {
+        return (
+          <div className="select-none rounded-lg bg-green-400 px-2 py-1">
+            Calling
+          </div>
+        );
+      } else
+        return (
+          <IconButton onClick={() => handleCallClick(CHAT_TYPE.VIDEO)}>
+            <VideocamIcon className="cursor-pointer text-white" />
+          </IconButton>
+        );
+    }
+  };
   return (
     <>
       {selectedChat ? (
@@ -276,24 +392,12 @@ const SingleChat = ({ fetch, setFetch, socketState, newTabsRef }) => {
             </div>
             {selectedChat.isGroup ? (
               <HStack spacing={10} marginRight={10}>
-                {createCurrentCallButton()}
+                {createCurrentCallGroupButton()}
                 <UpdateGroupPopup fetch={fetch} setFetch={setFetch} />
               </HStack>
             ) : (
               <HStack spacing={10} marginRight={10}>
-                {!call.joinLink || selectedChat._id !== call.chatId ? (
-                  <IconButton
-                    onClick={() => {
-                      handleCallClick(CHAT_TYPE.VIDEO);
-                    }}
-                  >
-                    <VideocamIcon className="cursor-pointer text-white" />
-                  </IconButton>
-                ) : (
-                  <div className="select-none rounded-lg bg-gray-400 px-2 py-1">
-                    Joined
-                  </div>
-                )}
+                {createCurrentCallButton()}
               </HStack>
             )}
           </div>

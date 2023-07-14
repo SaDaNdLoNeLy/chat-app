@@ -46,46 +46,57 @@ const addCallingUser = async ({ io = null, socket = null, userId }) => {};
 const leaveCallGroup = async ({ io = null, socket = null }) => {
   const chatId = socket.chatId;
   const chatObj = await Chat.findById(chatId);
-  const participants = chatObj.currentCall.participants;
   // console.log("participants :", participants);
   // console.log("socket.user.userId :", socket.user.userId);
-  const index = participants.findIndex(
+  console.log("socket.isGroup: ", socket.isGroup);
+  const index = chatObj.currentCall.participants.findIndex(
     (user_id) => user_id.valueOf() === socket.user.userId
   );
-  // console.log("index :", index);
+  console.log("index :", index);
   if (index === -1) return;
-  participants.splice(index, 1);
-  ///update user is calling
-  updateUserCalling(socket.user.userId, false);
 
-  if (participants.length === 0) {
+  if (socket.isGroup) {
+    chatObj.currentCall.participants.splice(index, 1);
+    ///update user is calling
+    updateUserCalling(socket.user.userId, false);
+  } else {
+    chatObj.currentCall.participants.forEach(async (user_id) => {
+      console.log("user_id :", user_id.valueOf());
+      await updateUserCalling(user_id.valueOf(), false);
+    });
+
+    chatObj.currentCall.participants = [];
+  }
+  console.log("participants :", chatObj.currentCall.participants);
+  if (chatObj.currentCall.participants.length === 0) {
     chatObj.currentCall.isCalling = false;
+    chatObj.currentCall.joinLink = "";
     const callHistoryObj = await CallHistory.findOne({ chat: chatId });
     const lastCall = callHistoryObj.calls[callHistoryObj.calls.length - 1];
     const callObj = await Call.findById(lastCall);
-    callObj.duration = Date.now() - callObj.createdAt;
+    callObj.duration = Math.floor((Date.now() - callObj.createdAt) / 1000);
     await callObj.save();
+
+    io.in(chatId).emit("change current call", chatId, false, "");
   }
   await chatObj.save();
 
-  socket
-    .in(chatId)
-    .emit("leaved call", socket.user, chatId, chatObj.currentCall.isCalling);
+  io.in(chatId).emit("leaved call", socket.user, chatId, socket.isGroup);
 };
 
-const joinCallGroup = async ({ io = null, socket = null }) => {
-  chatObj.currentCall.isCalling = true;
-  chatObj.currentCall.participants.push(socket.user.userId);
-  await chatObj.save();
+// const joinCallGroup = async ({ io = null, socket = null }) => {
+//   chatObj.currentCall.isCalling = true;
+//   chatObj.currentCall.participants.push(socket.user.userId);
+//   await chatObj.save();
 
-  ///sent invite call
-  chat.users.forEach((user) => {
-    if (user._id === newMessage.sender._id) return;
-    socket
-      .in(user._id)
-      .emit("invite call", newMessage.sender.username, chat._id, joinLink);
-  });
-};
+//   ///sent invite call
+//   chat.users.forEach((user) => {
+//     if (user._id === newMessage.sender._id) return;
+//     socket
+//       .in(user._id)
+//       .emit("invite call", newMessage.sender.username, chat._id, joinLink);
+//   });
+// };
 
 module.exports = {
   changeStatusUser,
@@ -93,5 +104,5 @@ module.exports = {
   updateUserStatusInChats,
   joinChats,
   leaveCallGroup,
-  joinCallGroup,
+  // joinCallGroup,
 };

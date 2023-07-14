@@ -13,6 +13,8 @@ const urlParams = new URLSearchParams(window.location.search);
 const chatId = urlParams.get("chat_id") || "";
 const chatType = urlParams.get("type") || "";
 const messageId = urlParams.get("message_id") || "";
+const isGroup = urlParams.get("isGroup") || "";
+
 const joinLink = window.location.href;
 const CallPage = () => {
   const { user } = ChatState();
@@ -35,6 +37,7 @@ const CallPage = () => {
         chatId,
         messageId,
         joinLink,
+        isGroup,
       },
     });
 
@@ -94,7 +97,7 @@ const CallPage = () => {
           channel: chatId, // your agora channel
           token: RTCToken,
           uid: uid,
-          layout: 1,
+          layout: isGroup === "true" ? 1 : 0,
           displayUsername: true,
           username: user.username,
           enableScreensharing: true,

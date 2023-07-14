@@ -4,8 +4,12 @@ const initState = {
   caller: null,
   joinLink: null,
   chatId: null,
+  messageId: null,
   isCalling: false,
   isTurnOffModal: false,
+  isGroup: null,
+  isCancel: null,
+  friendName: null,
 };
 
 const CallContext = createContext(initState);
@@ -33,6 +37,20 @@ const CallProvider = ({ children }) => {
     setCall((prevState) => ({ ...prevState, isTurnOffModal: isTurnOffModal }));
   };
 
+  const setIsGroup = (isGroup) => {
+    setCall((prevState) => ({ ...prevState, isGroup: isGroup }));
+  };
+
+  const setIsCancel = (isCancel) => {
+    setCall((prevState) => ({ ...prevState, isCancel: isCancel }));
+  };
+
+  const setMessageId = (messageId) => {
+    setCall((prevState) => ({ ...prevState, messageId: messageId }));
+  };
+  const setFriendName = (friendName) => {
+    setCall((prevState) => ({ ...prevState, friendName: friendName }));
+  };
   const resetCall = () => {
     setCall(initState);
   };
@@ -47,6 +65,10 @@ const CallProvider = ({ children }) => {
         setIsCalling,
         setChatId,
         setIsTurnOffModal,
+        setIsGroup,
+        setIsCancel,
+        setMessageId,
+        setFriendName,
       }}
     >
       {children}

@@ -18,6 +18,7 @@ const chatSchema = new mongoose.Schema(
     },
     currentCall: {
       isCalling: { type: Boolean, default: false },
+      joinLink: { type: String, default: "" },
       participants: {
         type: [
           {

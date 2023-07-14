@@ -23,5 +23,8 @@ const updateUserCalling = async (userId, isCalling) => {
   await userObj.save();
 };
 
-
-module.exports = { allUser, updateUserCalling };
+const checkUserInCall = async (userId) => {
+  const userObj = await User.findById(userId);
+  return userObj.isCalling;
+};
+module.exports = { allUser, updateUserCalling, checkUserInCall };

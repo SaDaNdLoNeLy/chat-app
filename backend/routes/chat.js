@@ -10,5 +10,5 @@ router.route("/group").post(checkToken, createGroup)
 router.route("/rename").put(checkToken, renameGroup)
 router.route("/groupadd").put(checkToken, addToGroup)
 router.route("/groupremove").put(checkToken, removeFromGroup)
-
+router.route("/")
 module.exports = router
